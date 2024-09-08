@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    td {
+      border: 1px solid black;
+      background-color: bisque;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    const $table = document.createElement('table');
+    const data = [];
+    for (let i = 0; i < 3; i++) {
+      const $tr = document.createElement('tr');
+      const row = [];
+      for (let j = 0; j < 3; j++) {
+        const $td = document.createElement('td');
+        row.push('');
+        $tr.appendChild($td);
+      }
+      $table.appendChild($tr);
+      data.push(row);
+    };
+    document.body.appendChild($table);
+
+    $table.addEventListener('click', handleTable);
+
+    let turn = 'O';
+    let clickable = true;
+    function handleTable(e) {
+      const $tag = e.target;
+      if ($tag === $table) return;
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if (!clickable || data[rowIndex][cellIndex]) return;
+      clickable = false;
+
+      if (myTurn(rowIndex, cellIndex)) return;
+
+      setTimeout(() => {
+        computerTurn();
+        clickable = true;
+      }, 1000);
+    };
+
+    function checkWin(row, cell) {
+      if ((data[row][0] === turn && data[row][1] === turn && data[row][2] === turn) ||
+        (data[0][cell] === turn && data[1][cell] === turn && data[2][cell] === turn) ||
+        (data[0][0] === turn && data[1][1] === turn && data[2][2] === turn) ||
+        (data[0][2] === turn && data[1][1] === turn && data[2][0] === turn)) {
+        return true;
+      }
+      return false;
+    }
+
+    function checkDraw() {
+      if (data.flat().every((item) => item)) {
+        setTimeout(() => { window.alert('비김') }, 100);
+        $table.removeEventListener('click', handleTable);
+        return true;
+      }
+      return false;
+    }
+
+    function myTurn(rowIndex, cellIndex) {
+      data[rowIndex][cellIndex] = turn;
+      $table.children[rowIndex].children[cellIndex].textContent = turn;
+      if (checkWin(rowIndex, cellIndex)) {
+        $table.removeEventListener('click', handleTable);
+        setTimeout(() => { window.alert(`${turn}의 승리!`) }, 100);
+        return true;
+      };
+      if (checkDraw()) return true;
+      passTheTurn();
+    }
+
+    function computerTurn() {
+      const empty = [];
+      data.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          if (!data[i][j]) {
+            empty.push([i, j]);
+          }
+        })
+      });
+
+      const [row, cell] = empty[Math.floor(Math.random() * empty.length)];
+      data[row][cell] = turn;
+      $table.children[row].children[cell].textContent = turn;
+      if (checkWin(row, cell)) {
+        $table.removeEventListener('click', handleTable);
+        setTimeout(() => { window.alert(`${turn}의 승리!`) }, 100);
+        return true;
+      };
+      passTheTurn();
+    }
+
+    function passTheTurn() {
+      turn = turn === 'O' ? 'X' : 'O';
+    }
+
+
+
+  </script>
+</body>
+
+</html>

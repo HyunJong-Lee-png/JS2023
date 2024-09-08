@@ -1,0 +1,313 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>2048</title>
+  <style>
+    #table {
+      border-collapse: collapse;
+      user-select: none;
+    }
+
+    #table td {
+      border: 10px solid #bbada0;
+      width: 116px;
+      height: 128px;
+      font-size: 50px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #score {
+      user-select: none;
+    }
+
+    .color-2 {
+      background-color: #eee4da;
+      color: #776e65;
+    }
+
+    .color-4 {
+      background-color: #eee1c9;
+      color: #776e65;
+    }
+
+    .color-8 {
+      background-color: #f3b27a;
+      color: 'white';
+    }
+
+    .color-16 {
+      background-color: #f69664;
+      color: 'white';
+    }
+
+    .color-32 {
+      background-color: #f77c5f;
+      color: 'white';
+    }
+
+    .color-64 {
+      background-color: #f75f3b;
+      color: 'white';
+    }
+
+    .color-128 {
+      background-color: #edd073;
+      color: #776e65;
+    }
+
+    .color-256 {
+      background-color: #edcc62;
+      color: #776e65;
+    }
+
+    .color-512 {
+      background-color: #edc950;
+      color: #776e65;
+    }
+
+    .color-1024 {
+      background-color: #edc53f;
+      color: #776e65;
+    }
+
+    .color-2048 {
+      background-color: #edc22e;
+      color: #776e65;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="table"></table>
+  <div id="score">0</div>
+  <script>
+    const $table = document.querySelector('#table');
+    const $score = document.querySelector('#score');
+    const $input = document.querySelector('#input');
+    const row = 4;
+    const cell = 4;
+    const data = [];
+    let zeroCount = 0;
+
+    function create2048() {
+      const $fragment = document.createDocumentFragment();
+      for (let i = 0; i < 4; i++) {
+        data.push([]);
+        const tr = document.createElement('tr');
+        for (let j = 0; j < 4; j++) {
+          data[i].push(0);
+          const td = document.createElement('td');
+          tr.append(td);
+        }
+        $fragment.appendChild(tr); //fragment는 메모리에만 저장하기 떔에 성능감소 염려가 없다.
+      }
+      $table.append($fragment); //fragment가 사라지면서 table에 한번에 tr태그들 추가
+      createNumber();    
+      draw();
+    }
+
+    function draw() {
+      data.forEach((rowData, i) => {
+        rowData.forEach((celldata, j) => {
+          const $td = $table.children[i].children[j];
+          if (celldata) {
+            $td.className = 'color-' + celldata;
+            $td.textContent = celldata;
+          } else {
+            $td.className = '';
+            $td.textContent = '';
+          }
+        });
+      });
+    }
+
+    function whatKeyIsIt(e) {
+      if (e.key === 'ArrowRight') { //오른쪽 키면 
+        conerNumber();     
+        for (let i = 0; i < row; i++) {
+          for (let j = 3; j > 0; j--) { //data돌면서 
+            if (data[i][j] === data[i][j - 1]) {
+              if (data[i][j] === 0 || data[i][j - 1] === 0) {
+                continue;
+              }
+              data[i][j] *= 2;
+              data[i][j - 1] = 0;
+              winner(data[i][j]);
+              zeroCount++; // 더해질게 없으면 카운트 되지 않음
+            }
+          }
+        }
+
+        if (!zeroCount) {         
+          if (!data.flat().includes(0)) alert('패배');
+          return; //움직이지도, 더해지지도 않으면 리턴
+        }
+        else { conerNumber(); createNumber(); draw();}
+      }
+
+      else if (e.key === 'ArrowUp') {
+        conerNumber1();//모든 숫자 구석으로
+        for (let i = 0; i < row; i++) {
+          for (let j = 0; j < 3; j++) { //data돌면서 
+            if (data[j][i] === data[j + 1][i]) {
+              if (data[j][i] === 0 || data[j + 1][i] === 0) {
+                continue;
+              }
+              data[j][i] *= 2;
+              data[j + 1][i] = 0;
+              winner(data[j][i]);
+              zeroCount++; // 더해질게 없으면 카운트 되지 않음
+            }
+          }
+        }
+
+        if (!zeroCount) {
+          if (!data.flat().includes(0)) alert('패배');
+          return; //움직이지도, 더해지지도 않으면 리턴
+        }
+        else { conerNumber1(); createNumber();  draw();}
+      }
+
+      else if (e.key === 'ArrowDown') {
+        conerNumber2();//모든 숫자 구석으로
+        for (let i = 0; i < row; i++) {
+          for (let j = 3; j > 0; j--) { //data돌면서 
+            if (data[j][i] === data[j - 1][i]) {
+              if (data[j][i] === 0 || data[j - 1][i] === 0) {
+                continue;
+              }
+              data[j][i] *= 2;
+              data[j - 1][i] = 0;
+              winner(data[j][i]);
+              zeroCount++; // 더해질게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        if (!zeroCount) {
+          if (!data.flat().includes(0)) alert('패배');
+          return; //움직이지도, 더해지지도 않으면 리턴
+        }
+        else { conerNumber2(); createNumber();  draw();}
+      }
+
+      else if (e.key === 'ArrowLeft') {
+        conerNumber3();//모든 숫자 구석으로
+        for (let i = 0; i < row; i++) {
+          for (let j = 0; j < 3; j++) { //data돌면서 
+            if (data[i][j] === data[i][j + 1]) {
+              if (data[i][j] === 0 || data[i][j + 1] === 0) {
+                continue;
+              }
+              data[i][j] *= 2;
+              data[i][j + 1] = 0;
+              winner(data[i][j]);
+              zeroCount++; // 더해질게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        if (!zeroCount) {
+          if (!data.flat().includes(0)) alert('패배');
+          return; //움직이지도, 더해지지도 않으면 리턴
+        } else { conerNumber3(); createNumber();  draw();}
+      }
+    }
+
+    function winner(data) {
+      if (data === 2048) {
+        setTimeout(() => alert('승!'),100);
+        return;
+      }
+    }
+
+    function conerNumber() {
+      zeroCount = 0; //항상 초기화
+      let k = 0;
+      while (k < 3) {
+        for (let i = 0; i < row; i++) {
+          for (let j = 3; j > 0; j--) {
+            if (data[i][j] === 0 && data[i][j - 1] !== 0) {  //양옆이 0이면 건너뜀
+              data[i][j] = data[i][j - 1];
+              data[i][j - 1] = 0;
+              zeroCount++; //움직일게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        k++;
+      }   
+    }
+
+    function conerNumber1() {
+      zeroCount = 0; //항상 초기화
+      let k = 0;
+      while (k < 3) {
+        for (let i = 0; i < row; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (data[j][i] === 0 && data[j + 1][i] !== 0) {  //양옆이 0이면 건너뜀
+              data[j][i] = data[j + 1][i];
+              data[j + 1][i] = 0;
+              zeroCount++; //움직일게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        k++;
+      }
+    }
+
+    function conerNumber2() {
+      zeroCount = 0; //항상 초기화
+      let k = 0;
+      while (k < 3) {
+        for (let i = 0; i < row; i++) {
+          for (let j = 3; j > 0; j--) {
+            if (data[j][i] === 0 && data[j - 1][i] !== 0) {  //양옆이 0이면 건너뜀
+              data[j][i] = data[j - 1][i];            
+              data[j - 1][i] = 0;
+              zeroCount++; //움직일게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        k++;
+      }
+    }
+
+    function conerNumber3() {
+      zeroCount = 0; //항상 초기화
+      let k = 0;
+      while (k < 3) {
+        for (let i = 0; i < row; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (data[i][j] === 0 && data[i][j + 1] !== 0) {  //양옆이 0이면 건너뜀
+              data[i][j] = data[i][j + 1];
+              data[i][j + 1] = 0;
+              zeroCount++; //움직일게 없으면 카운트 되지 않음
+            }
+          }
+        }
+        k++;
+      }
+    }
+
+    function createNumber() {
+      const emptyCells = [];
+      data.forEach((rowData, i) => {
+        rowData.forEach((cellData, j) => {
+          if (!cellData) {
+            emptyCells.push([i, j]);
+          }
+        });
+      });
+      const create = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      const $td = $table.children[create[0]].children[create[1]];
+      data[create[0]][create[1]] = [2, 4][Math.floor(Math.random() * 2)];
+      $td.textContent = data[create[0]][create[1]];
+      draw();
+    }
+
+    document.addEventListener('keyup', whatKeyIsIt);
+    create2048();
+  </script>
+</body>
+
+</html>

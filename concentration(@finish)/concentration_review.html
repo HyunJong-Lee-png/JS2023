@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>짝맞추기</title>
+  <style>
+    .card {
+      display: inline-block;
+      margin-right: 20px;
+      margin-bottom: 20px;
+      width: 80px;
+      height: 110px;
+      perspective: 140px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front {
+      background: navy;
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 1px solid black;
+      backface-visibility: hidden;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrapper"></div>
+  <script>
+    const $wrapper = document.querySelector('#wrapper');
+    const shuffle = [];
+    const color = ['red', 'yellow', 'orange', 'green', 'violet', 'pink'];
+    const copyColor = color.concat(color);
+    Array(12).fill().forEach(e => {
+      shuffle.push(copyColor.splice(Math.floor(Math.random() * copyColor.length), 1)[0]);
+    });
+
+    Array(12).fill().forEach((e, i) => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      const card_inner = document.createElement('div');
+      card_inner.classList.add('card-inner');
+      const card_front = document.createElement('div');
+      card_front.classList.add('card-front');
+      const card_back = document.createElement('div');
+      card_back.classList.add('card-back');
+      card_back.style.backgroundColor = shuffle[i];
+      card_inner.append(card_front, card_back);
+      card.append(card_inner);
+      $wrapper.append(card);    
+      setTimeout(() => {
+        card.classList.add('flipped');
+      }, 1000 + 100 * i);
+      setTimeout(() => {
+        card.addEventListener('click', cardFlip); //처음에 카드 보여주고 뒤집힐 때 함께 카드이벤트 넣어주기
+        card.classList.remove('flipped');
+      }, 3000)
+
+    });
+
+    let saveCard = [];
+    let correctCard = [];
+    let clickable = true;
+    function cardFlip(event) {
+      if (clickable) { 
+        if (saveCard.includes(this) || correctCard.includes(this)) { //같은 카드 누르면 리턴
+          return;
+        }
+        saveCard.push(this);
+        this.classList.add('flipped');
+        compareCard(this);
+        if (correctCard.length === 12) {
+          setTimeout(() => { alert('승리'); }, 500);
+        }
+      }
+    }
+   
+    function compareCard(card) { 
+      if (saveCard.length === 2) {
+        clickable = false;
+        const cardBack1 = saveCard[0].querySelector('.card-back');
+        const cardBack2 = saveCard[1].querySelector('.card-back');
+        if (cardBack1.style.backgroundColor !== cardBack2.style.backgroundColor) { //색이 다르면
+          setTimeout(() => {
+            saveCard[0].classList.remove('flipped');
+            saveCard[1].classList.remove('flipped');
+            saveCard = [];
+            clickable = true;
+          }, 700);
+        } else { //색이 같으면
+          correctCard = correctCard.concat(saveCard);
+          saveCard = [];
+          clickable = true;
+        }
+      }
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naver</title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+</head>
+
+<body>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    html,
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, "Apple SD Gothic Neo", sans-serif;
+      line-height: 10.5px;
+      letter-spacing: -0.4px;
+      font-weight: 500;
+      font-size: 10.5px;
+    }
+
+    html,
+    body,
+    button,
+    form,
+    fieldset,
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    ul,
+    ol {
+      list-style: none;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 0;
+    }
+
+    .wrapper {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      max-width: 1280px;
+      flex-direction: column;
+      margin: 0 auto;
+    }
+  </style>
+  <style>
+    header {
+      display: flex;
+      flex-direction: column;
+      height: 267px;
+    }
+
+    .header_wrapper {
+      width: 100%;
+      display: flex;
+      position: relative;
+    }
+
+    .header_menu {
+      width: 46px;
+      height: 46px;
+      padding: 10px;
+      position: absolute;
+      top: 18px;
+      left: -10px;
+
+      &::after {
+        content: '';
+        display: block;
+        background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+        background-size: 444px 434px;
+        background-position: -314px -330px;
+        background-repeat: no-repeat;
+        height: 26px;
+        width: 26px;
+      }
+
+      &:hover {
+        background-color: #f5f7f8;
+        border-radius: 50%;
+        padding: 9px;
+
+      }
+
+      &:hover::after {
+
+        position: relative;
+        top: 1px;
+        left: 1px;
+      }
+
+    }
+
+    .header_pay {
+      width: 46px;
+      height: 46px;
+      padding: 7px;
+      position: absolute;
+      top: 18px;
+      left: 43px;
+
+      &::after {
+        content: "";
+        display: block;
+        background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+        background-size: 444px 434px;
+        background-position: -295px -177px;
+        background-repeat: no-repeat;
+        height: 32px;
+        width: 32px;
+      }
+    }
+
+    .header_talk {
+      width: 46px;
+      height: 46px;
+      padding: 10px;
+      position: absolute;
+      top: 18px;
+      right: 40px;
+
+      &::after {
+        content: "";
+        display: block;
+        background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+        background-size: 444px 434px;
+        background-position: -364px -81px;
+        background-repeat: no-repeat;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    .header_notice {
+      width: 46px;
+      height: 46px;
+      padding: 10px;
+      position: absolute;
+      top: 18px;
+      right: -10px;
+
+      &::after {
+        content: "";
+        display: block;
+        background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+        background-size: 444px 434px;
+        background-position: -364px -27px;
+        background-repeat: no-repeat;
+        width: 26px;
+        height: 26px;
+      }
+    }
+  </style>
+  <div class="wrapper">
+    <header>
+      <div class="header_wrapper">
+        <div class="header_menu"></div>
+        <div class="header_pay"></div>
+        <div class="header_talk"></div>
+        <div class="header_notice"></div>
+      </div>
+
+      <style>
+        .header_search {
+          margin-top: 70px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        form {
+          width: 100%;
+          max-width: 708px;
+          display: flex;
+          border: 1px solid #03c75a;
+          border-radius: 33px;
+          align-items: center;
+
+          &>span {
+            width: 24px;
+            height: 24px;
+            margin-left: 27px;
+            margin-right: 16px;
+          }
+
+          &>span>svg {
+            fill: #03c75a;
+          }
+
+          &>input {
+            outline: none;
+            border: none;
+            width: 480px;
+            padding: 17px 0;
+            font-size: 2rem;
+
+            &::placeholder {
+              color: white;
+            }
+
+            &:focus::placeholder {
+              color: black;
+              opacity: 0.15;
+              letter-spacing: -0.4px;
+            }
+          }
+
+          .header_search_btns {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+            padding-left: 51px;
+
+          }
+
+          .header_search_button1,
+          .header_search_button2,
+          .header_search_button3 {
+            background-color: white;
+            border: none;
+          }
+
+          .header_search_button1 {
+            margin-left: 3px;
+            padding-right: 1px;
+
+            &:hover {
+              &::before {
+                background-position: -270px -234px;
+              }
+            }
+          }
+
+          .header_search_button2 {
+            margin-left: 6px;
+          }
+
+          .header_search_button3 {
+            width: 25px;
+            height: 25px;
+            margin-left: 11px;
+            margin-right: 27px;
+          }
+
+          .header_search_button1::before {
+            content: "";
+            display: block;
+            background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+            background-size: 444px 434px;
+            background-position: -199px -254px;
+            background-repeat: no-repeat;
+            width: 24px;
+            height: 14px;
+          }
+
+          .header_search_button2::before {
+            content: "";
+            display: block;
+            background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+            background-size: 444px 434px;
+            background-position: -102px -272px;
+            background-repeat: no-repeat;
+            width: 10px;
+            height: 6px;
+          }
+
+        }
+      </style>
+      <div class="header_search">
+        <form>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"></path>
+            </svg>
+          </span>
+          <input placeholder="검색어를 입력해 주세요" />
+          <div class="header_search_btns">
+            <button class="header_search_button1"></button>
+            <button class="header_search_button2"></button>
+            <button class="header_search_button3"><svg id="search-btn" viewBox="0 0 50 50"
+                xmlns="http://www.w3.org/2000/svg" style="fill: #03c75a">
+                <path
+                  d="M22.13.5c11.378 0 20.632 9.256 20.632 20.63 0 4.699-1.566 9.155-4.439 12.782l10.164 10.165a2.41 2.41 0 0 1-1.706 4.115 2.412 2.412 0 0 1-1.706-.705L33.31 35.719a2.41 2.41 0 0 1 0-3.41 15.71 15.71 0 0 0 4.628-11.178c0-8.718-7.09-15.808-15.807-15.808-8.718 0-15.808 7.09-15.808 15.808 0 7.15 4.817 13.43 11.714 15.273a2.41 2.41 0 0 1 1.705 2.954 2.41 2.41 0 0 1-2.95 1.705C7.788 38.658 1.5 30.46 1.5 21.131 1.5 9.756 10.756.5 22.13.5zm4.716 34.746a3.483 3.483 0 1 1 0 6.966 3.483 3.483 0 0 1 0-6.966z">
+                </path>
+              </svg></button>
+          </div>
+        </form>
+      </div>
+      <style>
+        .header_nav {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          font-size: 1.4rem;
+
+          &>ul {
+            display: flex;
+
+            &>li {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              position: relative;
+              width: 64px;
+              margin-left: -3px;
+              margin-top: 10px;
+
+              font-weight: normal;
+
+              &>span:first-child {
+                content: "";
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+                background-size: 444px 434px;
+                background-position: 0px -128px;
+                background-repeat: no-repeat;
+                width: 54px;
+                height: 54px;
+
+
+                &::before {
+                  content: '';
+                  display: block;
+                  background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+                  background-size: 444px 434px;
+                  background-position: -250px -90px;
+                  background-repeat: no-repeat;
+                  width: 44px;
+                  height: 44px;
+                  margin-bottom: 3px;
+                }
+              }
+
+              &>span:last-child {
+                text-overflow: ellipsis;
+
+                font-weight: 400;
+                letter-spacing: -0.8px;
+                margin: 8px 0 0 1px;
+              }
+            }
+          }
+        }
+      </style>
+      <nav class="header_nav">
+        <ul>
+          <li><span></span><span>메일</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+          <li><span></span><span>카페</span></li>
+        </ul>
+      </nav>
+    </header>
+    <style>
+      main {
+        display: grid;
+        grid-template-columns: 830px 420px;
+        gap: 30px;
+      }
+
+      .left_side {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .left_ad {
+        box-shadow: 0 0 0 1px #e3e5e8, 0 1px 2px 0 rgba(0, 0, 0, .04);
+        border-radius: 8px;
+        overflow: hidden;
+
+        &>img {
+          width: 830px;
+          height: 130px;
+
+        }
+      }
+
+      .left_article {
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 0;
+        box-shadow: 0 0 0 1px #e3e5e8, 0 1px 2px 0 rgba(0, 0, 0, .04);
+        border-radius: 8px;
+        height: 500px;
+
+      }
+
+      .left_news_stand_wrapper {
+        display: flex;
+        align-items: center;
+        padding-bottom: 17px;
+      }
+
+      .left_news_stand {
+        display: flex;
+        flex: 1;
+
+        &>span:first-child {
+          display: flex;
+          align-items: center;
+          color: #080808;
+          font-weight: 800;
+          font-size: 1.6rem;
+
+          &::after {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 4px;
+            background-color: #d3d5d7;
+            border-radius: 50%;
+            margin: 0 7px 1px;
+          }
+        }
+      }
+
+      .left_news_stand>span:nth-child(2),
+      .left_news_stand>span:nth-child(3),
+      .left_news_stand>span:nth-child(4),
+      .left_news_stand>span:nth-child(5) {
+        color: rgba(8, 8, 8, .5);
+        display: flex;
+        align-items: center;
+        font-weight: 800;
+        position: relative;
+        padding-left: 26px;
+        font-size: 1.6rem;
+        letter-spacing: -0.4px;
+      }
+
+      .left_news_stand>span:nth-child(2) {
+        padding-left: 0;
+      }
+
+
+      .left_news_stand>span:nth-child(2)::after,
+      .left_news_stand>span:nth-child(3)::after,
+      .left_news_stand>span:nth-child(4)::after {
+        content: "";
+        display: block;
+        background-color: #d3d5d7;
+        transform: skewX(-15deg);
+        width: 1px;
+        height: 15px;
+        position: absolute;
+        right: -13px;
+      }
+
+      .left_news_stand_ad {
+        margin: 2px 9px 2px auto;
+      }
+    </style>
+    <main>
+      <div class="left_side">
+        <div class="left_ad">
+          <img src="https://ssl.pstatic.net/melona/libs/1491/1491839/388de4b04e3ffd488c1e_20240402164005173.jpg" alt="">
+        </div>
+        <div class="left_article">
+          <div class="left_news_stand_wrapper">
+            <div class="left_news_stand">
+              <span>뉴스스탠드</span>
+              <span>언론사편집</span>
+              <span>엔터</span>
+              <span>스포츠</span>
+              <span>경제</span>
+            </div>
+            <div class="left_news_stand_ad">
+              <img src="https://s.pstatic.net/static/www/mobile/edit/20240222_1095/upload_1708585880722aZITS.png"
+                height="19" alt="2024 총선">
+            </div>
+          </div>
+          <style>
+            @keyframes news {
+              0% {
+                transform: translateY(0);
+              }
+
+              20% {
+                transform: translateY(0);
+              }
+
+              40% {
+                transform: translateY(-26px);
+              }
+
+              60% {
+                transform: translateY(-26px);
+              }
+
+              80% {
+                transform: translateY(-52px);
+              }
+
+              99.99999% {
+                transform: translateY(-52px);
+              }
+
+              100% {
+                transform: translateY(0px);
+              }
+            }
+
+            .left_news_home {
+              display: flex;
+              background-color: #f5f7f8;
+              padding: 12px 20px;
+              font-size: 1.4rem;
+              line-height: 26px;
+              white-space: nowrap;
+              align-items: center;
+
+              &>div:nth-child(2) {
+                height: 26px;
+                flex: 1;
+                overflow: hidden;
+           
+                &>div{
+         
+                 animation: news 5s infinite 3s linear;
+                }
+                div>div {
+                  width: 300px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+
+                }
+              }
+            }
+
+            .left_news_home2 {
+              white-space: nowrap;
+            }
+          </style>
+
+          <div class="left_news_home">
+            <div>
+              분야별 뉴스
+            </div>
+            <div>
+              <div>
+                <div>
+                  채널A민주 37.2% vs 국민의힘 36.3% ‘초박빙’
+                  시사저널의·정 마주 앉을까…의협 "尹 제안, 환영하지만 증원 중단해야"ddddddddddddddddddddddddddddddddddd
+                </div>
+                <div>111111111111111111111111111111111111111111111111111111111111111111111111111111111111</div>
+                <div>22222222222222222222222222222222222222222222222222222222222222222222222222222222</div>
+              </div>
+
+
+
+            </div>
+            <div>
+              뉴스스탠드
+            </div>
+            <div>
+              뉴스홈
+            </div>
+          </div>
+
+        </div>
+        <div class="left_news_grid"></div>
+        <div class="left_news_more"></div>
+      </div>
+      <div class="left_shopping"></div>
+  </div>
+  <style>
+    .right_side {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right_login {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 21px 20px 18px;
+      box-shadow: 0 0 0 1px #e3e5e8, 0 1px 2px 0 rgba(0, 0, 0, .04);
+      border-radius: 8px;
+      line-height: 20px;
+      font-size: 1.4rem;
+      margin-top: 1px;
+    }
+
+    .right_login_explain {
+      font-weight: 500;
+    }
+
+    .right_login_login_page {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 56px;
+      border: 1px solid rgba(0, 0, 0, .06);
+      border-radius: 4px;
+      background-color: #03c75a;
+      box-shadow: 0 2px 4px 0 rgba(3, 199, 90, .12);
+      margin-top: 13px;
+      padding: 17px 0;
+
+      &>span:first-child {
+        background-image: url(https://pm.pstatic.net/resources/asset/sp_main.74b52318.png);
+        background-size: 444px 434px;
+        background-position: -55px -166px;
+        background-repeat: no-repeat;
+        width: 72px;
+        height: 14px;
+        display: inline-block;
+        margin: 0 8px 0 0;
+      }
+
+      &>span:last-child {
+        color: white;
+      }
+    }
+
+    .right_login_find {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 16px;
+      font-size: 1.3rem;
+
+      &>span:first-child::after,
+      &>span:nth-child(2)::after {
+        content: "";
+        display: inline-block;
+        width: 1px;
+        height: 12px;
+        background-color: #d3d5d7;
+        margin: 0 12px;
+      }
+
+    }
+  </style>
+  <div class="right_side">
+    <div class="right_login">
+      <div class="right_login_explain">네이버를 더 안전하고 편리하게 이용하세요</div>
+      <div class="right_login_login_page"><span></span><span>로그인</span></div>
+      <div class="right_login_find">
+        <span>아이디 찾기</span><span>비밀번호 찾기</span><span>회원가입</span>
+      </div>
+    </div>
+
+  </div>
+  </main>
+  </div>
+</body>
+
+</html>

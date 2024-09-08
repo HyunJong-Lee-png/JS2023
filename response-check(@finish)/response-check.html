@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>반응속도</title>
+  <style>
+    #screen {
+      width: 300px;
+      height: 200px;
+      text-align: center;
+      user-select: none;
+    }
+
+    #screen.waiting {
+      background-color: aqua;
+    }
+
+    #screen.ready {
+      background-color: red;
+      color: white;
+    }
+
+    #screen.now {
+      background-color: greenyellow;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="screen" class="waiting">클릭해서 시작하세요</div>
+  <div id="result"></div>
+  <script>
+    const $screen = document.querySelector('#screen');
+    const $result = document.querySelector('#result');
+
+    let tId;
+    let timeStart;
+    let timeEnd;
+    let record = [];
+    function 화면에따라(e) {
+      switch (e.target.className) {
+        case "waiting":
+          $screen.className = 'ready';
+          $screen.textContent = '초록색이 되면 클릭하세요.';      
+          tId = setTimeout(() => {
+            timeStart = new Date();
+            $screen.className = 'now';
+            $screen.textContent = '지금 클릭하세요!';
+          }, Math.random() * 3000 + 1000);
+          break;
+        case "ready":
+          $screen.className = 'waiting';
+          $screen.textContent = '너무 성급하군요!';
+          clearTimeout(tId);
+          break;
+        case "now":
+          timeEnd = new Date();
+          const clickSpeed = timeEnd - timeStart;
+          record.push(clickSpeed);
+          const topFive = record.sort((a, b) => a - b).slice(0,5);
+          const averageTime = record.reduce((prev, cur) => prev += cur)/ record.length;
+          $result.textContent = (`현재: ${((clickSpeed) * 0.0001).toFixed(3)}초, 평균:${(averageTime*0.0001).toFixed(3)}초`);
+          topFive.forEach((e,i) => {$result.append(document.createElement('br'),`${i+1}등은 ${(topFive[i]*0.0001).toFixed(3)}초 입니다.`)});
+          $screen.className = 'waiting';
+          $screen.textContent = '클릭해서 시작하세요.';
+          break;
+      }    
+    }
+
+    $screen.addEventListener('click', 화면에따라);
+  </script>
+</body>
+</html>

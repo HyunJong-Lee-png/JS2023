@@ -1,0 +1,218 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>두더지 잡기</title>
+  <style>
+    .cell {
+      display: inline-block;
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background: 'yellow';
+      overflow: hidden;
+    }
+
+    .gopher,
+    .bomb {
+      width: 200px;
+      height: 200px;
+      bottom: 0;
+      position: absolute;
+      transition: bottom 1s;
+    }
+
+    .gopher {
+      background: url('./gopher.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .dead {
+      background: url('./dead_gopher.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .bomb {
+      background: url('./bomb.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .boom {
+      background: url('./explode.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .hidden {
+      bottom: -200px;
+    }
+
+    .hole {
+      width: 200px;
+      height: 150px;
+      position: absolute;
+      bottom: 0;
+      background: url('./mole-hole.png') center center no-repeat;
+      background-size: 200px 150px;
+    }
+
+    .hole-front {
+      width: 200px;
+      height: 30px;
+      position: absolute;
+      bottom: 0;
+      background: url('./mole-hole-front.png') center center no-repeat;
+      background-size: 200px 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <span id="timer">8</span>초&nbsp;
+    <span id="score">0</span>점
+    <span id="life">3</span>목숨
+    <button id="start">시작</button>
+  </div>
+  <div id="game">
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $timer = document.querySelector('#timer');
+    const $score = document.querySelector('#score');
+    const $life = document.querySelector('#life');
+    const $start = document.querySelector('#start');
+    const $$cell = document.querySelectorAll('.cell');
+    const $$gopher = document.querySelectorAll('.gopher');
+    const $$bomb = document.querySelectorAll('.bomb');
+
+    $start.addEventListener('click', onClick);
+    $$gopher.forEach((gopher, i) => {
+      gopher.addEventListener('click', catchMole);
+    })
+    $$bomb.forEach((bomb, i) => {
+      bomb.addEventListener('click', catchMole);
+    })
+
+    let score = 0;
+    let life = 3;
+    function catchMole(event) {
+      if (event.target.classList.contains('gopher')) {
+        if (event.target.classList.contains('dead')) return;
+        event.target.classList.add('dead', 'hidden');
+        $score.textContent = ++score;
+        setTimeout(() => { event.target.classList.remove('dead') }, 1000)
+      } else if (event.target.classList.contains('bomb')) {
+        if (event.target.classList.contains('boom')) return;
+        event.target.classList.add('boom', 'hidden');
+        $score.textContent = --score;
+        $life.textContent = --life;
+        setTimeout(() => { event.target.classList.remove('boom') }, 1000)
+      }
+    }
+
+    let tId;
+    let tId2;
+    function onClick() {
+      $start.removeEventListener('click', onClick);
+      tId2 = setInterval(timer, 100);
+      tId = setInterval(moleUpDown, 1000);
+      moleUpDown();
+    }
+
+    let time = 15;
+    function timer() {
+      time = (time * 10 - 1) / 10;
+      $timer.textContent = time;
+      if (!time || !life) {
+        setTimeout(() => { alert('패배!') }, 50);
+        clearInterval(tId);
+        clearInterval(tId2);
+      }
+      return;
+    }
+
+    const gopher = 0.3;
+    const bomb = 0.5;
+    let tId3 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const moleUpDown = () => {
+      $$cell.forEach((cellTag, i) => {
+        if (tId3[i]) return;
+        if (Math.random() < gopher) {
+          cellTag.querySelector('.gopher').classList.remove('hidden');
+          tId3[i] = setTimeout(() => {
+            cellTag.querySelector('.gopher').classList.add('hidden');
+            tId3[i] = 0;
+          }, 1000)
+        } else if (Math.random() < bomb) {
+          cellTag.querySelector('.bomb').classList.remove('hidden');
+          tId3[i] = setTimeout(() => {
+            cellTag.querySelector('.bomb').classList.add('hidden');
+            tId3[i] = 0;
+          }, 1000)
+        }
+      })
+    }
+
+  </script>
+</body>
+
+</html>

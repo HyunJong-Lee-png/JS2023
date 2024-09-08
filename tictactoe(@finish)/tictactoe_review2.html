@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>틱택토</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid black;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    const $table = document.createElement('table');
+    const $fragment = document.createDocumentFragment();
+    [1, 2, 3].forEach((e, i) => {
+      const $tr = document.createElement('tr');
+      [1, 2, 3].forEach((e, i) => {
+        const $td = document.createElement('td');
+        $tr.append($td);
+      })
+      $fragment.append($tr);
+    })
+    $table.append($fragment);
+    document.body.append($table);
+    $table.addEventListener('click', onClick);
+
+    let turn = 'O';
+    let clickable = true;
+    function onClick(event) {
+      if (clickable) {
+        clickable = false;
+        const row = event.target.parentNode.rowIndex;
+        const cell = event.target.cellIndex;
+        myTurn(row, cell);
+        if (checkWin(row, cell)) return;
+        turn = 'X';
+        comTurn();
+      }
+    }
+
+    function myTurn(row, cell) {
+      const td = $table.children[row].children[cell];
+      if (!td.textContent) {
+        td.textContent = turn;    
+      }
+    }
+
+    function comTurn() {
+      setTimeout(() => {
+        const empty = [];
+        $table.querySelectorAll('tr').forEach((row, rowIndex) => {
+          row.querySelectorAll('td').forEach((cell, cellIndex) => {
+            if (!cell.textContent) {
+              empty.push(cell);
+            }
+          })
+        })
+        const emptyTd = empty[Math.floor(Math.random() * empty.length)];
+        const row = emptyTd.parentNode.rowIndex;
+        const cell = emptyTd.cellIndex;
+        emptyTd.textContent = turn;
+        clickable = true;
+        if(checkWin(row,cell)) return;
+        turn = 'O';
+      }, 1000)
+
+    }
+
+    function winnerMessage() {
+      if (turn === 'O') {
+        setTimeout(() => { alert('나의 승리!') }, 500);
+      } else if (turn === 'X') {
+        setTimeout(() => { alert('컴퓨터의 승리!') }, 500);
+      }
+      return;
+    }
+
+    function checkWin(row, cell) {
+      if (($table.children[row].children[0].textContent === turn && $table.children[row].children[1].textContent === turn && $table.children[row].children[2].textContent === turn) ||
+        ($table.children[0].children[cell].textContent === turn && $table.children[1].children[cell].textContent === turn && $table.children[2].children[cell].textContent === turn) ||
+        ($table.children[0].children[0].textContent === turn && $table.children[1].children[1].textContent === turn && $table.children[2].children[2].textContent === turn) ||
+        ($table.children[2].children[0].textContent === turn && $table.children[1].children[1].textContent === turn && $table.children[0].children[2].textContent === turn)) {
+        winnerMessage();
+        return true;
+      }
+      return false;
+    }
+
+  </script>
+</body>
+
+</html>

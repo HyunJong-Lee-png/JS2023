@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .hidden {
+      display: none;
+    }
+
+    #battle {
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="submit">
+    <input id='input' type="text" placeholder="주인공 이름을 입력하세요!" />
+    <button>시작</button>
+  </form>
+  <div id="player"> </div>
+  <form id="battle-menu" class="hidden">
+    <button name="모험">모험</button>
+    <button name="휴식">휴식</button>
+    <button name="종료">종료</button>
+  </form>
+  <form id="battle" class="hidden">
+    <button name="공격">공격</button>
+    <button name="회복">회복</button>
+    <button name="도망">도망</button>
+  </form>
+  <div id="message"></div>
+  <script>
+    const $submit = document.querySelector('#submit');
+    const $battleMenu = document.querySelector('#battle-menu');
+    const $battle = document.querySelector('#battle');
+    const $player = document.querySelector('#player');
+    const $message = document.querySelector('#message');
+
+    class Player {
+      constructor(name, game) {
+        this.name = name;
+        this.level = 1
+        this.hp = 100;
+        this.maxHp = 100;
+        this.xp = 0;
+        this.maxXp = 15;
+        this.att = 15;
+        this.game = game;
+      }
+      attack() {
+
+        this.monster.hp -= this.att;
+      }
+    };
+
+    class Monster {
+      constructor(name, hp, att, xp, game, hero) {
+        this.name = name;
+        this.hp = hp;
+        this.att = att;
+        this.xp = xp;
+        this.game = game;
+        this.hero = hero;
+      }
+      attack() {
+        this.hero.hp -= this.att;
+      }
+    }
+
+    class Game {
+      constructor(name) {
+        this.hero = new Player(name, this);
+        this.monster = '';
+        this.startGame();
+      }
+
+      startGame() {
+
+        this.getRobby();
+        $battleMenu.addEventListener('submit', this.battleMenu);
+        $battle.addEventListener('submit', this.battle)
+        this.heroUpdate();
+
+      }
+
+      heroUpdate() {
+        const hero = this.hero;
+        $player.textContent = `이름: ${hero.name} LEV: ${hero.level} HP: ${hero.hp}/${hero.maxHp} XP: ${hero.xp}/${hero.maxXp} ATT: ${hero.att}`;
+      }
+
+      monsterUpdate(monster) {
+        return `이름: ${monster.name} Hp: ${monster.hp} ATT: ${monster.att} XP: ${monster.xp}`;
+      }
+
+      battleMenu = (e) => {
+        e.preventDefault();
+        if (e.submitter.name === '모험') {
+          this.monster = [new Monster('스켈레톤', 100, 15, 25, this, this.hero),
+          new Monster('슬라임', 60, 10, 10, this, this.hero),
+          new Monster('마왕', 200, 25, 40, this, this.hero)][Math.floor(Math.random() * 3)];
+          $message.innerHTML = `<div>${this.monster.name}이 나타났다!</div><div>${this.monsterUpdate(monster)}</div>`;
+          this.hero.monster = this.monster;
+          this.getBattleMode();
+        }
+        else if (e.submitter.name === '휴식') {
+          this.hero.hp = this.hero.maxHp;
+          this.heroUpdate();
+        }
+        else if (e.submitter.name === '종료') {
+          $message.innerHTML = '';
+          this.endGame();
+        }
+      };
+
+      battle = (e) => {
+        e.preventDefault();
+        const hero = this.hero;
+        const monster = this.monster;
+
+        if (e.submitter.name === '공격') {
+          hero.attack();
+          if (monster.hp <= 0) {
+            $message.innerHTML = `<div>${monster.name}이 뒤졌습니다. ${monster.xp}xp를 획득힙니다.</div>`;
+            this.getXp(monster);
+            this.heroUpdate();
+            $battle.classList.add('hidden');
+            $battleMenu.classList.remove('hidden');
+            return;
+          }
+          monster.attack();
+          if (hero.hp <= 0) {
+            $message.innerHTML = `<div>당신은 죽었습니다. 게임을 다시 시작하세요.</div>`;
+            this.endGame();
+            return;
+          }
+          this.heroUpdate();
+          $message.innerHTML =
+            `<div>${hero.name}이(가) ${hero.att}만큼의 공격을 주고 ${monster.att}만큼의 피해를 입었습니다. </div>
+            <div>${this.monsterUpdate(monster)}</div>`;
+        }
+        else if (e.submitter.name === '회복') {
+          hero.hp += 10;
+          if (hero.hp >= hero.maxHp) {
+            hero.hp = hero.maxHp;
+          }
+          monster.attack();
+          if (hero.hp <= 0) {
+            $message.innerHTML = `<div>당신은 죽었습니다. 게임을 다시 시작하세요.</div>`;
+            this.endGame();
+            return;
+          }
+          this.heroUpdate();
+        }
+        else if (e.submitter.name === '도망') {
+          $message.textContent = `부리나케 도망쳤다!`;
+          $battle.classList.add('hidden');
+          $battleMenu.classList.remove('hidden');
+        }
+      }
+
+      getXp(monster) {
+        const hero = this.hero;
+        hero.xp += monster.xp;
+        while (hero.xp >= hero.maxXp) {
+          hero.xp -= hero.maxXp;
+          hero.maxXp += 10;
+          hero.maxHp += 20;
+          hero.level += 1;
+          hero.att += 5;
+          hero.hp = hero.maxHp;
+        }
+      }
+
+      getInitial() {
+        $submit.classList.remove('hidden');
+        $battleMenu.classList.add('hidden');
+      }
+
+      getRobby() {
+        $submit.classList.add('hidden');
+        $battleMenu.classList.remove('hidden');
+      }
+
+      getBattleMode() {
+        $battleMenu.classList.add('hidden');
+        $battle.classList.remove('hidden')
+      }
+
+      endGame() {
+        $player.innerHTML = ``;
+        $battleMenu.removeEventListener('submit', this.battleMenu);
+        $battle.removeEventListener('submit', this.battle);
+        $submit.classList.remove('hidden');
+        $battle.classList.add('hidden');
+        $battleMenu.classList.add('hidden');
+      }
+    }
+
+    $submit.addEventListener('submit', startGame);
+
+    function startGame(e) {
+      e.preventDefault();
+      const newGame = new Game(e.target.input.value);
+      e.target.input.value = '';
+    }
+  </script>
+</body>
+
+</html>

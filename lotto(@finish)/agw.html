@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .circle {
+      width: 40px;
+      height: 40px;
+      border: 1px solid black;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="result">추첨결과는? </div>
+  <div class="bonus">보너스: </div>
+  <script>
+    const $result = document.querySelector('.result');
+    const $bonus = document.querySelector('.bonus');
+
+    const numbers = Array(100).fill().map((_, i) => i);
+    const shuffle = [];
+
+    for (let i = 0; i < 7; i++) {
+      shuffle.push(numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0]);
+    }
+    const lottoNums = shuffle.sort((a, b) => a - b);
+    const bonusNum = lottoNums[lottoNums.length - 1];
+
+    for (let i = 0; i < 7; i++) {
+      setTimeout(() => {
+        awg(lottoNums[i], $result);
+      }, 1000 * i);
+    }
+    setTimeout(() => {
+      awg(bonusNum, $bonus);
+    }, 6000);
+
+    function awg(ball, tag) {
+      const $span = document.createElement('span');
+      $span.classList.add('circle');
+      $span.textContent = ball;
+      tag.appendChild($span);
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>가위바위보</title>
+  <style>
+    #computer {
+      width: 142px;
+      height: 200px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="computer"></div>
+  <div>
+    <button id="scissors" class="btn">가위</button>
+    <button id="rock" class="btn">바위</button>
+    <button id="paper" class="btn">보</button>
+  </div>
+  <div id="score">0</div>
+  <script>
+    const $computer = document.querySelector('#computer');
+    const $scissors = document.querySelector('#scissors');
+    const $rock = document.querySelector('#rock');
+    const $paper = document.querySelector('#paper');
+    const $score = document.querySelector('#score');
+    const IMG_URL = './rsp.png';
+    //$computer.style.background = `url(${IMG_URL}) 0 0`; //가위
+    //$computer.style.background = `url(${IMG_URL}) -220px 0`; //바위
+    //$computer.style.background = `url(${IMG_URL}) -440px 0`; //보
+    //$computer.style.backgroundSize = 'auto 200px';
+
+    const rspX = {
+      scissors: '0',
+      rock: '-220px',
+      paper: '-440px',
+    };
+
+    const changeComputerHand = () => {
+      if (comChoice === 'scissors') {
+        comChoice = 'rock';
+      } else if (comChoice === 'rock') {
+        comChoice = 'paper';
+      } else if (comChoice === 'paper') {
+        comChoice = 'scissors';
+      } $computer.style.background = `url(${IMG_URL}) ${rspX[comChoice]} 0 / auto 200px`;
+    };
+
+    let comChoice = 'scissors';
+    let tId = setInterval(changeComputerHand, 50);
+
+    //다섯번을 빠르게 누르면 인터벌 1번,2번,3번,4번,5번이 호출이 되고 쉬었다가
+    //또 누르면 5번만 클리어되고 밀렸던 나머지 인터벌들은 클리어를 못하게 된다.
+    /*
+    const clickButton = () => {
+      clearInterval(tId);
+      $scissors.removeEventListener('click', clickButton);
+      $rock.removeEventListener('click', clickButton);
+      $paper.removeEventListener('click', clickButton);
+      // 점수 계산 및 화면 표시
+      setTimeout(() => {
+        clearInterval(tId); //한번 더 넣어서 해결
+        tId = setInterval(changeComputerHand, 50);
+        $scissors.addEventListener('click', clickButton);
+        $rock.addEventListener('click', clickButton);
+        $paper.addEventListener('click', clickButton);
+
+      }, 1000);
+    } */
+    //위의 식과 동일
+    let clickable = true;
+    let score = 0;
+    const clickButton = () => {
+      if(clickable) {
+        clearInterval(tId);
+        clickable = false;
+        //점수 계산 및 화면 표시
+        //컴퓨터의 선택은 comChoice에, 내 선택은 event.target.textContent
+        /*const myChoice = event.target.textContent === '가위'?
+        'scissors' : event.target.textContent === '바위'?
+        'rock' : 'paper';*/
+        const myChoice = event.target.id;
+
+        if (myChoice === comChoice){
+          $score.textContent = '무승부';
+        } else if (myChoice === 'paper' && comChoice === 'rock'){
+          score ++;
+          $score.textContent = `승리! ${score}점`;       
+        } else if (myChoice === 'rock' && comChoice === 'scissors'){
+          score ++;
+          $score.textContent = `승리! ${score}점`; 
+        } else if (myChoice === 'scissors' && comChoice === 'paper'){
+          score ++;
+          $score.textContent = `승리! ${score}점`; 
+        } else { score --; $score.textContent = `패배.. ${score}점`; }
+                 
+        setTimeout(() => {
+          clickable = true;
+          tId = setInterval(changeComputerHand, 50);
+        },1000);
+      }
+    }; 
+    
+
+    $scissors.addEventListener('click', clickButton);
+    $rock.addEventListener('click', clickButton);
+    $paper.addEventListener('click', clickButton);
+
+    
+  </script>
+</body>
+
+</html>

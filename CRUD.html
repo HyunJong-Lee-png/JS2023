@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <header></header>
+ 
+  <nav></nav>
+  <div id='crud'></div>
+  <article></article>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.1/redux.js"></script>
+  <script>
+    const reducer = (state, action) => {
+      console.log(state,action);
+      if (state === undefined) {
+        return {
+          selected_id:null,
+          contents: [{
+            id: 1,
+            title: `HTML`,
+            desc: `HTML is...`,
+          },
+          {
+            id: 2,
+            title: 'CSS',
+            desc: 'CSS is...',
+          }],
+        }
+
+      }
+      if (action.type === 'CLICK_NAV') {
+        return {
+          ...state,
+          selected_id:action.id,
+        }
+      }
+    }
+    const store = Redux.createStore(reducer);
+
+    const header = () => {
+      document.querySelector('header').innerHTML = `
+    <h1>WEB</h1>
+    <div>Hello, web!</div>`;
+    }
+    store.subscribe(header);
+    header();
+
+    const nav = () => {
+      const state = store.getState();
+      const list = [];
+      list.push('<ol>');
+      const lis = state.contents.map((e, i) => {
+        return `<li> <a href="#" onclick="event.preventDefault();
+          store.dispatch({type:'CLICK_NAV',id:${e.id},})">${e.title}</a></li>`;
+      });
+      list.push(lis.join(''));
+      list.push('</ol>');
+      document.querySelector('nav').innerHTML =
+        list.join('');
+    }
+    store.subscribe(nav);
+    nav();
+
+    const crud = () => {
+      document.querySelector('#crud').innerHTML = `
+    <button>create</button>
+    <button>delete</button>`;
+    }
+    store.subscribe(crud);
+    crud();
+
+    const article = () => {
+
+      const state = store.getState();
+      let a = '';
+      state.contents.forEach((e,i) => {
+        if(e.id === state.selected_id){
+          a = state.contents[i];
+        }
+      })
+      document.querySelector('article').innerHTML = `
+    <h2>${a.title}</h2>
+    <div>${a.desc}</div>`;
+    }
+    store.subscribe(article);
+
+  </script>
+</body>
+
+</html>

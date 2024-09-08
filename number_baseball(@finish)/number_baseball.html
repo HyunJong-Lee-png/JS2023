@@ -1,0 +1,105 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>숫자야구</title>
+</head>
+
+<body>
+  <form id="form">
+    <input type="text" id="input">
+    <button>확인</button>
+  </form>
+  <div id="logs"></div>
+  <script>
+    const $input = document.querySelector('#input');
+    const $form = document.querySelector('#form');
+    const $logs = document.querySelector('#logs');
+    const numbers = [];
+    for (let n = 0; n < 9; n += 1) {
+      numbers.push(n + 1);
+    }
+    //const numbers = Array(9).fill().map((element,index) => index+1);
+    
+
+    const answer = [];
+    for (let n = 0; n < 4; n++) {
+
+      const index = Math.floor(Math.random() * (numbers.length)); //0~8 숫자
+      answer.push(numbers[index]);
+      numbers.splice(index, 1); // answer에 중복된 숫자가 없도록 기존넘버에서 들어간 숫자를 지워줌      
+    }
+
+    const tries = [];
+    function checkInput(input) {
+
+      if (input.length !== 4) {
+        return alert('4자리 숫자를 입력하세요.'); //alert의 return값은 undefined;
+      }
+      if (new Set(input).size !== 4) { //Set 함수는 중복된 수를 무시하고 배열생성
+        return alert('중복되지 않게 입력하세요.');
+      }
+      if (tries.includes(input)) {
+        return alert('이미 시도한 값입니다');
+      }
+
+      return true;
+    }
+
+    function compareNum(value) {
+
+      let strike = 0;
+      let ball = 0;
+      const answerChar = answer.join('');
+
+      for (let i = 0; i < answerChar.length; i++) {
+
+        if (value[i] === answerChar[i]) {
+          strike++;
+        } else if (value.indexOf(answerChar[i]) > -1) {
+          ball++;
+        }
+      }
+      if (strike === 0 && ball === 0) {
+        out++;
+        $logs.append(`${out} 아웃`, document.createElement('br'));
+      } else {
+        $logs.append(`${value}: 스트라이크: ${strike}개, 볼: ${ball}개`, document.createElement('br'));
+      }
+      if (out === 3) {
+        defeated();
+        return;
+      }
+
+    }
+
+    function defeated(){
+      const message = document.createTextNode(`패배!, 정답은 ${answer.join('')}입니다.`);
+        $logs.appendChild(message);
+    }
+
+    let out = 0;
+    $form.addEventListener('submit', (event) => {
+      event.preventDefault();//기본동작 막기
+      const value = $input.value; // = event.target[0].value;
+      $input.value = '';
+      if (!checkInput(value)) {
+        return;
+      }
+      if (answer.join('') === value) {
+        $logs.textContent = "홈런!";
+        return;
+      }
+      if (tries.length >= 9) {
+        defeated();
+        return;
+      }
+      tries.push(value);
+      compareNum(value);;
+
+    });
+
+  </script>
+</body>
+
+</html>

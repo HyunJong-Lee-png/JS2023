@@ -1,0 +1,236 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>두더지 잡기</title>
+  <style>
+    .cell {
+      display: inline-block;
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background: 'yellow';
+      overflow: hidden;
+    }
+
+    .gopher,
+    .bomb {
+      width: 200px;
+      height: 200px;
+      bottom: 0;
+      position: absolute;
+      transition: bottom 1s;
+    }
+
+    .gopher {
+      background: url('./gopher.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .dead {
+      background: url('./dead_gopher.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .bomb {
+      background: url('./bomb.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .boom {
+      background: url('./explode.png') center center no-repeat;
+      background-size: 200px 200px;
+    }
+
+    .hidden {
+      bottom: -200px;
+    }
+
+    .hole {
+      width: 200px;
+      height: 150px;
+      position: absolute;
+      bottom: 0;
+      background: url('./mole-hole.png') center center no-repeat;
+      background-size: 200px 150px;
+    }
+
+    .hole-front {
+      width: 200px;
+      height: 30px;
+      position: absolute;
+      bottom: 0;
+      background: url('./mole-hole-front.png') center center no-repeat;
+      background-size: 200px 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <span id="timer">8</span>초&nbsp;
+    <span id="score">0</span>점
+    <span id="life">3</span>목숨
+    <button id="start">시작</button>
+  </div>
+  <div id="game">
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+      <div class="cell">
+        <div class="hole"></div>
+        <div class="gopher hidden"></div>
+        <div class="bomb hidden"></div>
+        <div class="hole-front"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $timer = document.querySelector('#timer');
+    const $score = document.querySelector('#score');
+    const $start = document.querySelector('#start');
+    const $game = document.querySelector('#game');
+    const $$cells = document.querySelectorAll('.cell');
+    const $life = document.querySelector('#life');
+    const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let started = false;
+    let score = 0;
+    let time = 10;
+    let life = 3;
+
+    $start.addEventListener('click', () => {
+      if (started) return; //이미 시작 했으면 무시
+      started = true;
+      console.log('시작');
+      const timerId = setInterval(() => {
+        time = (time * 10 - 1) / 10; //소수점 계산시 문제있음
+        $timer.textContent = time;
+        if (time === 0) {
+          setTimeout(() => {
+            clearInterval(timerId);//setTimeout밖에 써도 상관x
+            clearInterval(tickId);
+            alert(`게임 오버! 점수는${score}점`);
+          }, 50)
+        };
+        if (life === 0) {
+          setTimeout(() => {
+            alert(`게임오버! 점수는 ${score}점`);
+            clearInterval(timerId);
+            clearInterval(tickId);
+          }, 50)
+        }
+      }, 100);
+
+      const tickId = setInterval(tick, 1000); //transition이 1초여서 최소 2초부터설정
+      tick();
+    });
+
+    let gopherPercent = 0.3;
+    let bombPercent = 0.5; //누적퍼센트로 해야 폭탄확률이 20퍼가된다.
+    function tick() {
+      holes.forEach((hole, index) => {
+        if (hole) return; //뭔가 일어나고 있으면 바로 리턴
+        const random = Math.random();
+        if (random < gopherPercent) { //30퍼에 안들면 else if로 빠지므로
+          const $gopher = $$cells[index].querySelector('.gopher');
+          holes[index] = setTimeout(() => { //1초 뒤 사라짐       
+            $gopher.classList.add('hidden');
+            holes[index] = 0;
+          }, 1000);
+          $gopher.classList.remove('hidden'); //이게 setTime보다 먼저 실행
+        } else if (random < bombPercent) {
+          const $gopher = $$cells[index].querySelector('.bomb');
+          holes[index] = setTimeout(() => {
+            $gopher.classList.add('hidden');
+            holes[index] = 0;
+          }, 1000);
+          $gopher.classList.remove('hidden');
+        }
+      });
+    }
+
+    let clickable = Array(10).fill(true); //내가 짠 중복클릭 안되게 하는 저급기술
+    $$cells.forEach((cell, index) => {
+      cell.querySelector('.gopher').addEventListener('click', (e) => {
+        //e.target.classList.add('dead');       
+        // $score.textContent = Number($score.textContent) + 5;
+        //이렇게 하나만 추가하면 이미지 클릭하자마자 hidden이 되지 않는다.
+        e.target.classList.add('dead');
+        e.target.classList.add('hidden');
+        clearTimeout(holes[index]); //굳이 안해도 될거같긴 함       
+        if (clickable[index] === true) {
+          score += 1;
+          $score.textContent = score;
+          clickable[index] = false;
+        }
+        setTimeout(() => { clickable[index] = true; holes[index] = 0; e.target.classList.remove('dead'); }, 1000);
+      });
+
+      cell.querySelector('.bomb').addEventListener('click', (e) => {
+        if (!e.target.classList.contains('boom')) { // 개고수가 짠 중복클릭 안되게하는 고급기술
+          score -= 1;
+          $score.textContent = score;
+          life -= 1;
+          $life.textContent = life;
+        }
+        e.target.classList.add('boom');
+        e.target.classList.add('hidden'); // 터지자마자 hidden이 되야함
+        setTimeout(() => {
+          e.target.classList.remove('boom');
+        }, 1000);
+      });
+    });
+  </script>
+</body>
+
+</html>

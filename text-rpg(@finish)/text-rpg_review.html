@@ -1,0 +1,203 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>텍스트 RPG</title>
+  <style>
+  </style>
+</head>
+
+<body>
+  <form id="start-screen">
+    <input id="name-input" placeholder="주인공 이름을 입력하세요!" />
+    <button id="start">시작</button>
+  </form>
+  <div id="screen">
+    <div id="hero-stat">
+      <span id="hero-name"></span>
+      <span id="hero-level"></span>
+      <span id="hero-hp"></span>
+      <span id="hero-xp"></span>
+      <span id="hero-att"></span>
+    </div>
+    <form id="game-menu" style="display: none;">
+      <button id="battle">모험</button>
+      <button id="rest">휴식</button>
+      <button id="quit">종료</button>
+    </form>
+    <form id="battle-menu" style="display: none;">
+      <button id="attack">공격</button>
+      <button id="recovery">회복</button>
+      <button id="escape">도망</button>
+    </form>
+    <div id="message"></div>
+    <div id="monster-stat">
+      <span id="monster-name"></span>
+      <span id="monster-hp"></span>
+      <span id="monster-att"></span>
+    </div>
+  </div>
+  <script>
+    const $startScreen = document.querySelector('#start-screen');
+    const $gameMenu = document.querySelector('#game-menu');
+    const $battleMenu = document.querySelector('#battle-menu');
+    const $message = document.querySelector('#message');
+    const $heroStat = document.querySelector('#hero-stat');
+    const $monsterStat = document.querySelector('#monster-stat');
+
+    class Unit {
+      constructor(hp, att) {
+        this.hp = hp;
+        this.att = att;
+      }
+    }
+    class Hero extends Unit {
+      constructor(game, name) {
+        super(100, 15);
+        this.game = game;
+        this.name = name;
+        this.level = 1;
+        this.xp = 0;
+      }
+      attack(monster) {
+        monster.hp -= this.att;
+      }
+      heal() {
+        this.hp += 20;
+      }
+    }
+    class Monster extends Unit {
+      constructor(game, name, hp, att) {
+        super(hp, att);
+        this.game = game;
+        this.name = name;
+      }
+      attack(hero) {
+        hero.hp -= this.att;
+      }
+    }
+
+    class Game {
+      constructor(heroName) {
+        this.hero = new Hero(this, heroName);
+        this.monster = '';
+        this.monsterList = [
+          { name: '슬라임', hp: 50, att: 10, },
+          { name: '스켈레톤', hp: 80, att: 15, },
+          { name: '마왕', hp: 180, att: 25 }
+        ];
+        this.startGame();
+      };
+
+      startGame() {
+        $gameMenu.addEventListener('submit', this.gameMenu);
+        $battleMenu.addEventListener('submit', this.battleMenu);
+        this.heroUpdate();
+      };
+
+      gameMenu = (event) => {
+        event.preventDefault();
+        if (event.submitter.id === 'battle') {
+          let randomMon = this.monsterList[(Math.floor(Math.random() * this.monsterList.length))];
+          this.monster = new Monster(this, randomMon.name, randomMon.hp, randomMon.att);
+          this.monsterUpdate();
+          $message.textContent = `${this.monster.name}이 나타났다!`;
+          $battleMenu.style.display = 'block';
+          $gameMenu.style.display = 'none';
+          return;
+        }
+        if (event.submitter.id === 'rest') {
+          const { hero } = this;
+          //체력회복
+          hero.hp += 50;
+          this.heroUpdate();
+          return;
+        }
+        if (event.submitter.id === 'quit') {
+          //게임종료
+          this.hero = '';
+          this.monster = '';
+          this.heroUpdate();
+          this.monsterUpdate();
+          $gameMenu.removeEventListener('submit', this.gameMenu);
+          $battleMenu.removeEventListener('submit', this.battleMenu);
+          $gameMenu.style.display = 'none';
+          $startScreen.style.display = 'block';
+          return;
+        }
+      };
+
+      battleMenu = (event) => {
+        event.preventDefault();
+        if (event.submitter.id === 'attack') {
+          const { hero, monster } = this;
+
+          hero.attack(monster);
+          monster.attack(hero);
+          this.heroUpdate();
+          this.monsterUpdate();
+          return;
+        }
+        if (event.submitter.id === 'recovery') {
+          const { hero, monster } = this;
+          hero.heal();
+          monster.attack(hero);
+          this.heroUpdate();
+          this.monsterUpdate();
+          return;
+        }
+        if (event.submitter.id === 'escape') {
+          $gameMenu.style.display = 'block';
+          $battleMenu.style.display = 'none';
+          $message.textContent = '부리나케 도망쳤다!'
+          this.heroUpdate();
+          this.monster = '';
+          this.monsterUpdate();
+          return;
+        }
+      };
+
+      heroUpdate() {
+        const { hero } = this;
+        if (hero === '') {
+          $heroStat.children[0].textContent = ``;
+          $heroStat.children[1].textContent = ``;
+          $heroStat.children[2].textContent = ``;
+          $heroStat.children[3].textContent = ``;
+          $heroStat.children[4].textContent = ``;
+          return;
+        }
+        $heroStat.children[0].textContent = `이름:${hero.name}`;
+        $heroStat.children[1].textContent = `Level:${hero.level}`;
+        $heroStat.children[2].textContent = `Hp:${hero.hp}`;
+        $heroStat.children[3].textContent = `Xp:${hero.xp}`;
+        $heroStat.children[4].textContent = `Att:${hero.att}`;
+      }
+      monsterUpdate() {
+        const { monster } = this;
+        if (monster === '') {
+          $monsterStat.children[0].textContent = ``;
+          $monsterStat.children[1].textContent = ``;
+          $monsterStat.children[2].textContent = ``;
+          return;
+        }
+        $monsterStat.children[0].textContent = `이름:${monster.name}`;
+        $monsterStat.children[1].textContent = `Hp:${monster.hp}`;
+        $monsterStat.children[2].textContent = `Att:${monster.att}`;
+      }
+    }
+
+    
+    $startScreen.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const heroName = event.target['name-input'].value;
+      const game1 = new Game(heroName);
+      event.target['name-input'].value = '';
+      $startScreen.style.display = 'none';
+      $gameMenu.style.display = 'block';
+    });
+
+  </script>
+</body>
+
+</html>

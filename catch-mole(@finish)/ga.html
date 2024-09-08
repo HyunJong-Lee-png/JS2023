@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .container {
+      display: grid;
+      grid-template-columns: repeat(3, 200px);
+      grid-auto-rows: 200px;
+    }
+
+    .cell {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mole-hole {
+      background: url('./mole-hole.png');
+
+    }
+
+    .mole-hole-front {
+      background: url('./mole-hole-front.png');
+    }
+
+    .bomb {
+      background: url('./bomb.png');
+    }
+
+    .explode {
+      background: url('./explode.png');
+    }
+
+    .gopher {
+      background: url('./gopher.png');
+    }
+
+    .dead {
+      background: url('./dead_gopher.png');
+    }
+
+    .mole-hole,
+    .mole-hole-front,
+    .bomb,
+    .gopher {
+      background-size: cover;
+      position: absolute;
+      width: 200px;
+      height: 150px;
+      bottom: 0;
+      transition: bottom 1s;
+    }
+
+    .mole-hole-front {
+      height: 30px;
+    }
+
+    .gopher,
+    .bomb {
+      height: 200px;
+    }
+
+    .hidden {
+      bottom: -200px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <span id="second">0</span>초
+    <span id="score">0</span>점
+    <span id="life">3</span>목숨
+    <button id="start">시작</button>
+  </div>
+  <div class="container">
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+    <div class="cell">
+      <div class="mole-hole"></div>
+      <div class="mole-hole-front"></div>
+      <div class="gopher hidden"></div>
+      <div class="bomb hidden"></div>
+    </div>
+  </div>
+  <script>
+    const $time = document.querySelector('#second');
+    const $score = document.querySelector('#score');
+    const $life = document.querySelector('#life');
+    const $start = document.querySelector('#start');
+    const $$cells = document.querySelectorAll('.cell');
+    const bomb = 0.3;
+    const gopher = 0.7;
+    let score = 0;
+    let life = 3;
+    let tId;
+    let time = 10;
+    const holes = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    $start.addEventListener('click', startGame);
+
+    $$cells.forEach(cell => {
+      cell.querySelector('.gopher').addEventListener('click', handleGopher);
+      cell.querySelector('.bomb').addEventListener('click', handleBomb);
+      function handleGopher() {
+
+        if (!this.classList.contains('dead')) {
+          this.classList.add('dead');
+          this.classList.add('hidden');
+          $score.textContent = ++score;
+          setTimeout(() => {
+            this.classList.remove('dead');
+          }, 1000);
+        }
+      }
+      function handleBomb() {
+        if (!this.classList.contains('explode')) {
+          this.classList.add('explode');
+          this.classList.add('hidden');
+          $score.textContent = --score;
+          $life.textContent = --life;
+          setTimeout(() => {
+            this.classList.remove('explode');
+          }, 1000);
+        }
+      }
+    })
+
+    function startGame() {
+      $start.disabled = true;
+      const tId1 = setInterval(() => {
+        time = (time * 10 - 1) / 10;
+        $time.textContent = time;
+        if (life === 0 || time <= 0) {
+          window.alert('게임오버!');
+          clearInterval(tId2);
+          clearInterval(tId1);
+          $start.disabled= false;
+          return;
+        }
+      }, 100);
+      let tId2;
+
+      awwa();
+      tId2 = setInterval(awwa, 1000);
+
+    }
+
+    function awwa() {
+      $$cells.forEach((cell, idx) => {
+        if (holes[idx]) {
+          holes[idx] = 0;
+          return;
+        }
+
+        const percent = Math.random();
+        if (percent <= bomb) {
+          const $bomb = cell.querySelector('.bomb');
+          $bomb.classList.remove('hidden');
+          holes[idx] = setTimeout(() => {
+            $bomb.classList.add('hidden');
+          }, 1000);
+        } else if (percent <= gopher) {
+          const $gopher = cell.querySelector('.gopher');
+          $gopher.classList.remove('hidden');
+          holes[idx] = setTimeout(() => {
+            $gopher.classList.add('hidden');
+          }, 1000);
+        }
+      });
+    }
+
+
+  </script>
+</body>
+
+</html>

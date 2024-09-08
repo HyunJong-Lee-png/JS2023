@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>틱택토</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid black;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!--table>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table-->
+  <script>
+    const { body } = document; //구조분해 할당 정말 중요
+    //const body = document.body;
+    //const createElement = document.createElement;
+    const $table = document.createElement('table');
+    const $result = document.createElement('div');
+    let turn = 'O';
+    let clickable = true;
+    const rows = [];
+    for (let i = 0; i < 3; i++) {
+      rows.push([]);
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const $tr = document.createElement('tr'); //tr1번,,tr2번.. tr1번을 다른 태그에 추가하면 기존 태그에서 빠짐
+
+      for (let j = 0; j < 3; j++) {
+        const $td = document.createElement('td'); //td1번, td2번, td3번.. 각각따로생성
+        rows[i][j] = $td;
+
+        $tr.append($td);
+      }
+      $table.append($tr);
+    }
+
+    const checkWinner = (target) => {
+
+
+      const rowIndex = target.parentNode.rowIndex;
+      const cellIndex = target.cellIndex;
+
+      let winnerMessage = false;
+      if (rows[rowIndex][0].textContent === turn &&
+        rows[rowIndex][1].textContent === turn &&
+        rows[rowIndex][2].textContent === turn) {
+        winnerMessage = true;
+      }
+      if (rows[0][cellIndex].textContent === turn &&
+        rows[1][cellIndex].textContent === turn &&
+        rows[2][cellIndex].textContent === turn) {
+        winnerMessage = true;
+      }
+      if (rows[0][0].textContent === turn &&
+        rows[1][1].textContent === turn &&
+        rows[2][2].textContent === turn) {
+        winnerMessage = true;
+      }
+      if (rows[2][0].textContent === turn &&
+        rows[1][1].textContent === turn &&
+        rows[0][2].textContent === turn) {
+        winnerMessage = true;
+      }
+      return winnerMessage;
+    }
+
+    const callback = (event) => { //$table 태그의 이벤트 버블링 현상
+      if (clickable) {
+        clickable = false;
+        if ((event.target.textContent)) { clickable = true; return; }//칸에 글자가 있나?
+        event.target.textContent = turn;
+
+        if (checkWinner(event.target)) {
+          $result.textContent = `${turn} 승리!`;
+          $table.removeEventListener('click', callback);
+          return;
+        }
+
+        //무승부 구현  
+        /*let count = true;
+        rows.forEach((row, ri) => {
+          row.forEach((col, ci) => {
+            if (!col.textContent) //빈 문자면
+              count = false;
+          });
+        });
+        */
+        const count = rows.flat().every(td => td.textContent);//모두 true일때 true반환
+        if (count) {
+          $result.textContent = '무승부입니다!!!!!!!!!!';
+          return;
+        }
+
+        //승리와 무승부 둘다 못했을때 턴을 넘긴다.
+        turn = turn === 'O' ? 'X' : 'O';
+
+
+        setTimeout(() => { //여기부터 컴퓨터의 턴
+          const computerTds = rows.flat().filter(item => !item.textContent); //필터 없으면 반복문 2개 돌면서 빈배열 만들고 pushpush
+          const computerTd = computerTds[Math.floor(Math.random() * computerTds.length)];
+          computerTd.textContent = turn;
+
+          if (checkWinner(computerTd)) {
+            $result.textContent = `${turn} 승리!`;
+            $table.removeEventListener('click', callback);
+            return;
+          }
+          turn = turn === 'X' ? 'O' : 'X'; //여기까지가 컴퓨터의 턴
+          clickable = true;
+        }, 1000)
+
+      }
+    };
+
+    $table.addEventListener('click', callback);
+
+    body.append($table);
+    body.append($result);
+
+
+  </script>
+</body>
+
+</html>

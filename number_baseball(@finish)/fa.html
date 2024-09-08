@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="number" id="input" />
+  <button id="button">확인</button>
+  <div id="result"></div>
+  <script>
+    const $input = document.querySelector('#input');
+    const $button = document.querySelector('#button');
+    const $result = document.querySelector('#result');
+
+    let fourNum = [];
+    let myNum;
+    let strike = 0;
+    let ball = 0;
+    let out = 0;
+    let life = 10;
+
+    const nums = Array(10).fill().map((_, i) => i);
+    while (nums.length > 6) {
+      fourNum.push(nums.splice(Math.floor(Math.random() * nums.length), 1)[0]);
+    }
+
+    function handleClick() {
+      $input.value = '';
+      $input.focus();
+      if (myNum.length > 4 || new Set(myNum).size !== 4) {
+        window.alert('네자리입력해씨발련아 or 중복숫자 x');
+        return;
+      }
+      if (fourNum.join('') === myNum) {
+        window.alert('성공');
+      } else {
+
+        const myNumber = myNum.split('').map(i => parseInt(i));
+        myNumber.forEach((number, i) => {
+          if (fourNum.includes(number)) {
+            if (fourNum[i] === myNumber[i]) {
+              strike++;
+            } else {
+              ball++;
+            }
+          }
+        });
+        if (!strike && !ball) {
+          out++;
+        }
+        life--;
+        if (out === 3 || life === 0) {
+          window.alert('패배 ㅅㄱ');
+        }
+      }
+      const $div = document.createElement('div');
+      $div.textContent = `${strike}스트라이크 ${ball}볼 ${out}아웃`;
+      $result.appendChild($div);
+      strike = 0;
+      ball = 0;
+    }
+
+    $input.addEventListener('input', handleInput);
+    $button.addEventListener('click', handleClick);
+    console.log(fourNum);
+    function handleInput(e) {
+      myNum = e.target.value;
+    }
+  </script>
+</body>
+
+</html>

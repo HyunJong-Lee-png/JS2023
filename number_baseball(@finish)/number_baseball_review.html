@@ -1,0 +1,82 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>숫자야구</title>
+</head>
+
+<body>
+  <form id="form">
+    <input type="text" id="input">
+    <button>확인</button>
+  </form>
+  <div id="logs"></div>
+  <script>
+    const $form = document.querySelector('#form');
+    const $input = document.querySelector('#input');
+    const $logs = document.querySelector('#logs');
+
+    const shuffle = [];
+    const answer = [];
+    let strike = 0;
+    let ball = 0;
+    let out = 0;
+    let tries = [];
+
+    Array(10).fill().forEach((e, i) => {
+      shuffle.push(i);
+    });
+    [1, 2, 3, 4].forEach((e, i) => {
+      answer.push(shuffle.splice(Math.floor(Math.random() * shuffle.length), 1)[0]);
+    });
+    const answerNum = answer.join('');
+
+    $form.addEventListener('submit', compareNumber);
+
+    function compareNumber(e) {
+      e.preventDefault();
+      const challenge = $input.value;
+      $input.value = '';
+      $input.focus();
+
+      if(!checkNum(challenge)) {
+        return;
+      }
+      
+      tries.push(challenge);
+      
+      for (let i = 0; i < answerNum.length; i++) {
+        if (answerNum[i] === challenge[i]) {
+          strike++;
+        } else if (answerNum.includes(challenge[i])) {
+          ball++;
+        }
+      }
+      (!strike && !ball) ? out++ : '';
+      $logs.append(`${challenge}: ${strike} 스트라이크, ${ball} 볼, ${out} 아웃 입니다.`, document.createElement('br'));
+      strike = 0;
+      ball = 0;
+      if (out === 3 || tries.length === 10) {
+        $logs.appendChild(document.createTextNode(`패배! 정답은 ${answerNum}이였습니다.`));
+      }
+    }
+
+    function checkNum(challenge){
+      if (new Set(challenge).size !== 4) {
+        alert('네자리 숫자 입력하시오.');   
+        return false;   
+      }
+      if (tries.includes(challenge)) {
+        alert('중복되지 않게 입력해주세요');   
+        return false;     
+      }
+      if (answerNum === challenge) {
+        alert('승리!');   
+        return false;     
+      }
+      return true;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>로또추첨기</title>
+  <style>
+    .ball {
+      display: inline-block;
+      border: 1px solid black;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 20px;
+      text-align: center;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='result'>추첨 결과는? </div>
+  <div id='bonus'>보너스: </div>
+  <script>
+    const $result = document.querySelector('#result');
+    const $bonus = document.querySelector('#bonus');
+
+    const shuffle = [];
+    const number = Array(50).fill().map((e, i) => i);
+    while (shuffle.length < 7) {
+      shuffle.push(number.splice(Math.floor(Math.random() * number.length), 1)[0]);
+    }
+    shuffle.sort((a, b) => a - b);
+
+    for (let i = 0; i < shuffle.length; i++) {
+      setTimeout(() => {
+        const $resultNum = document.createElement('span');
+        $result.append($resultNum)
+        $resultNum.className = 'ball';
+        $resultNum.textContent = shuffle[i];
+        if (i === shuffle.length - 1) {
+          const $bonusNum = document.createElement('span');
+          $bonus.append($bonusNum);
+          $bonusNum.className = 'ball';
+          $bonusNum.textContent = shuffle[i]
+        }
+      }, 1000 * (i + 1))
+    }
+  </script>
+</body>

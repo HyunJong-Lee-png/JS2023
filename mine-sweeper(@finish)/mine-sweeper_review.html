@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>지뢰찾기</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid #bbb;
+      text-align: center;
+      line-height: 20px;
+      width: 20px;
+      height: 20px;
+      background: #888;
+    }
+
+    td.opened {
+      background: white;
+    }
+
+    td.flag {
+      background: red;
+    }
+
+    td.question {
+      background: orange;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <input placeholder="지뢰" id="mine" size="5" />
+    <button>생성</button>
+  </form>
+  <div id="timer">0초</div>
+  <table id="table">
+    <tbody></tbody>
+  </table>
+  <div id="result"></div>
+  <script>
+    const row = 10;
+    const cell = 10;
+    const mine = 99;
+    const $form = document.querySelector('#form');
+    const $timer = document.querySelector('#timer');
+    const $table = document.querySelector('#table');
+    const $result = document.querySelector('#result');
+    const $tbody = document.querySelector('#table tbody');
+
+    $form.addEventListener('submit', plantMine);
+
+    const CODE = {
+      blank: 0,
+      mine: -1,
+      mineFlag: -2,
+      mineQuestion: -3,
+      opened: 1,
+      flag: 2,
+      question: 3,
+    }
+
+    const data = [];
+    function plantMine(event) {
+      $form.removeEventListener('submit', plantMine);
+      event.preventDefault();
+      const fragment = document.createDocumentFragment();
+      Array(row).fill().forEach(e => {
+        const tr = document.createElement('tr');
+        const rowData = [];
+        Array(cell).fill().forEach((e, i) => {
+          const td = document.createElement('td');
+          const cellData = 0;
+          tr.append(td);
+          rowData.push(cellData);
+        })
+        data.push(rowData);
+        fragment.append(tr);
+      })
+      $tbody.append(fragment);
+      $table.append($tbody);
+      //초기화
+      const plantRandomMine = [];
+      const shuffle = Array(row * cell).fill().map((e, i) => i);
+      for (let i = 0; i < mine; i++) {
+        plantRandomMine.push(shuffle.splice(Math.floor(Math.random() * shuffle.length), 1)[0]);
+        const rowIndex = parseInt(plantRandomMine[i] / row);
+        const cellIndex = plantRandomMine[i] % row;
+        data[rowIndex][cellIndex] = CODE.mine;
+        $tbody.children[rowIndex].children[cellIndex].textContent = 'X';
+      }
+    }
+
+    $table.addEventListener('click', onClick);
+    $table.addEventListener('contextmenu', holdMine);
+
+    function onClick(event) {
+      const rI = event.target.parentNode.rowIndex;
+      const cI = event.target.cellIndex;
+      checkMine(rI, cI);
+    }
+
+    function holdMine(event) {
+      event.preventDefault();
+      const rI = event.target.parentNode.rowIndex;
+      const cI = event.target.cellIndex;
+
+      switch (data[rI][cI]) {
+        case CODE.blank:
+          data[rI][cI] = CODE.flag;
+          event.target.className = 'flag';
+          event.target.textContent = '!';
+          break;
+
+        case CODE.mine:
+          data[rI][cI] = CODE.mineFlag;
+          event.target.className = 'flag';
+          event.target.textContent = '!';
+          break;
+
+        case CODE.mineFlag:
+          data[rI][cI] = CODE.mineQuestion;
+          event.target.className = 'question';
+          event.target.textContent = '?'
+          break;
+
+        case CODE.mineQuestion:
+          data[rI][cI] = CODE.mine;
+          event.target.className = '';
+          event.target.textContent = 'X';
+          break;
+
+        case CODE.flag:
+          data[rI][cI] = CODE.question;
+          event.target.className = 'question';
+          event.target.textContent = '?';
+          break;
+
+        case CODE.question:
+          data[rI][cI] = CODE.blank;
+          event.target.className = '';
+          event.target.textContent = '';
+          break;
+      }
+
+    }
+
+    let count = 0;
+    let firstMine = true;
+    function checkMine(rI, cI) {
+      if (data[rI]?.[cI] === undefined) return;
+      if (data[rI][cI] === CODE.blank) {
+        data[rI][cI] = CODE.opened;
+        console.log(++count);
+        $tbody.children[rI].children[cI].className = 'opened';
+        if (count === row * cell - mine) {
+          setTimeout(() => {
+            alert('승리!');
+            $table.removeEventListener('click', onClick);
+            $table.removeEventListener('contextmenu', holdMine);
+            return;
+          }, 50)
+        }
+        const haveMine = [data[rI - 1]?.[cI - 1], data[rI - 1]?.[cI], data[rI - 1]?.[cI + 1], data[rI][cI - 1],
+        data[rI][cI + 1], data[rI + 1]?.[cI - 1], data[rI + 1]?.[cI], data[rI + 1]?.[cI + 1]]
+          .filter(e => [CODE.mine, CODE.mineFlag, CODE.mineQuestion].includes(e)).length;
+
+        if (!haveMine) {
+          checkMine(rI - 1, cI - 1);
+          checkMine(rI - 1, cI);
+          checkMine(rI - 1, cI + 1);
+          checkMine(rI, cI - 1);
+          checkMine(rI, cI + 1);
+          checkMine(rI + 1, cI - 1);
+          checkMine(rI + 1, cI);
+          checkMine(rI + 1, cI + 1);
+          return;
+        }
+        $tbody.children[rI].children[cI].textContent = haveMine;
+      } else if (data[rI][cI] === CODE.mine) {
+        if (firstMine) {
+          firstMine = false;
+          checkForMine();
+          transferMine(rI - 1, cI - 1); //여기서 7개안쓰고 이거 하나만 쓰면 맨왼쪽상단의 지뢰를 클릭했을때 return 맞고 바로 종료되서 7개써야함
+          transferMine(rI - 1, cI);
+          transferMine(rI - 1, cI + 1);
+          transferMine(rI, cI - 1);
+          transferMine(rI, cI + 1);
+          transferMine(rI + 1, cI - 1);
+          transferMine(rI + 1, cI);
+          transferMine(rI + 1, cI + 1);
+          data[rI][cI] === CODE.opened;
+          $tbody.children[rI].children[cI].className = 'opened';
+          const haveMine = [data[rI - 1]?.[cI - 1], data[rI - 1]?.[cI], data[rI - 1]?.[cI + 1], data[rI][cI - 1],
+          data[rI][cI + 1], data[rI + 1]?.[cI - 1], data[rI + 1]?.[cI], data[rI + 1]?.[cI + 1]]
+            .filter(e => [CODE.mine, CODE.mineFlag, CODE.mineQuestion].includes(e)).length;
+          haveMine && ($tbody.children[rI].children[cI].textContent = haveMine);
+          return;
+        }
+        alert('너짐');
+        $table.removeEventListener('click', onClick);
+        $table.removeEventListener('contextmenu', holdMine);
+      }
+    }
+
+    let transMineOK = false;
+    let check = 0;
+    function transferMine(rI, cI) {
+
+      if (data[rI]?.[cI] === undefined || transMineOK || mineCheck[rI][cI]) {
+        console.log(++check); return;
+      }
+      if (data[rI][cI] === CODE.blank) {
+        transMineOK = true;
+        data[rI][cI] = CODE.mine;
+        $tbody.children[rI].children[cI].textContent = 'X';
+      } else if (data[rI][cI] === CODE.mine) {
+        mineCheck[rI][cI] = true;
+        transferMine(rI - 1, cI - 1);
+        transferMine(rI - 1, cI);
+        transferMine(rI - 1, cI + 1);
+        transferMine(rI, cI - 1);
+        transferMine(rI, cI + 1);
+        transferMine(rI + 1, cI - 1);
+        transferMine(rI + 1, cI);
+        transferMine(rI + 1, cI + 1);
+      }
+    }
+
+    const mineCheck = [];
+    function checkForMine() {
+      Array(row).fill().forEach(e => {
+        const rowData = [];
+        Array(cell).fill().forEach((e, i) => {
+          const cellData = false;;
+          rowData.push(cellData);
+        })
+        mineCheck.push(rowData);
+      })
+    }
+
+  </script>
+</body>
+
+</html>

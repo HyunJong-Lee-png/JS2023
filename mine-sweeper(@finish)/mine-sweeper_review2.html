@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>지뢰찾기</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid #bbb;
+      text-align: center;
+      line-height: 20px;
+      width: 20px;
+      height: 20px;
+      background: #888;
+    }
+
+    td.opened {
+      background: white;
+    }
+
+    td.flag {
+      background: red;
+    }
+
+    td.question {
+      background: orange;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <input placeholder="지뢰" id="mine" size="5" />
+    <button>생성</button>
+  </form>
+  <div id="timer">0초</div>
+  <table id="table">
+    <tbody></tbody>
+  </table>
+  <div id="result"></div>
+  <script>
+    const $form = document.querySelector('#form');
+    const $table = document.querySelector('#table');
+    const $tbody = document.querySelector('tbody');
+
+    const row = 10;
+    const column = 10;
+    const mine = 50;
+
+    const CODE = {
+      blank: 0,
+      opened: 1,
+      flag: 2,
+      question: 3,
+      mine: -1,
+      mineFlag: -2,
+      mineQuestion: -3,
+    }
+
+    $form.addEventListener('submit', plantMine);
+
+    let data = [];
+    function plantMine(event) {
+      $form.removeEventListener('submit', plantMine);
+      event.preventDefault();
+      const $fragment = document.createDocumentFragment();
+      Array(column).fill().forEach((e, i) => {
+        const $tr = document.createElement('tr');
+        const rowData = [];
+        Array(row).fill().forEach((e, i) => {
+          const $td = document.createElement('td');
+          const cellData = CODE.blank;
+          $tr.append($td);
+          rowData.push(cellData);
+        })
+        $fragment.append($tr);
+        data.push(rowData);
+      })
+      $tbody.append($fragment);
+      $table.append($tbody);
+
+      const plantRandomMine = [];
+      const shuffle = Array(row * column).fill().map((e, i) => i);
+      for (let i = 0; i < mine; i++) {
+        plantRandomMine.push(shuffle.splice(Math.floor(Math.random() * shuffle.length), 1)[0]);
+        const rowIndex = parseInt(plantRandomMine[i] / row);
+        const columnIndex = plantRandomMine[i] % row;
+        data[rowIndex][columnIndex] = CODE.mine;
+        $tbody.children[rowIndex].children[columnIndex].textContent = 'X';
+      }
+    }
+    $table.addEventListener('click', checkMine);
+    $table.addEventListener('contextmenu', holdMine);
+
+    function checkMine(event) {
+      const rI = event.target.parentNode.rowIndex;
+      const cI = event.target.cellIndex;
+      checkAroundMine(rI, cI);
+    }
+
+    let count = 0;
+    function checkAroundMine(rI, cI) {
+      if (data[rI]?.[cI] === CODE.blank) {
+        data[rI][cI] = CODE.opened;
+        $tbody.children[rI].children[cI].className = 'opened';
+        count ++;
+        if(count === row*column-mine){
+          alert('승리!');
+          return;
+        }
+        const mineMount = [data[rI - 1]?.[cI - 1], data[rI - 1]?.[cI], data[rI - 1]?.[cI + 1], data[rI][cI - 1],
+        data[rI][cI + 1], data[rI + 1]?.[cI - 1], data[rI + 1]?.[cI], data[rI + 1]?.[cI + 1]]
+          .filter(e => [CODE.mine, CODE.mineFlag, CODE.mineQuestion].includes(e)).length;
+        if (mineMount) {
+          $tbody.children[rI].children[cI].textContent = mineMount;
+        } else {
+          checkAroundMine(rI - 1, cI - 1);
+          checkAroundMine(rI - 1, cI);
+          checkAroundMine(rI - 1, cI + 1);
+          checkAroundMine(rI, cI - 1);
+          checkAroundMine(rI, cI + 1);
+          checkAroundMine(rI + 1, cI - 1);
+          checkAroundMine(rI + 1, cI);
+          checkAroundMine(rI + 1, cI + 1);
+        }
+      }
+      else if (data[rI]?.[cI] === CODE.mine) {
+        if (data.flat().every(e => e !== CODE.opened)) {
+          data[rI][cI] = CODE.opened;
+          $tbody.children[rI].children[cI].className = 'opened';
+          const mineCheck = [];
+          Array(column).fill().forEach((e, i) => {
+            const rowData = [];
+            Array(row).fill().forEach((e, i) => {
+              rowData.push(false);
+            })
+            mineCheck.push(rowData);
+          })
+          console.log(mineCheck);
+          transferMine(rI, cI, mineCheck);
+          const mineMount = [data[rI - 1]?.[cI - 1], data[rI - 1]?.[cI], data[rI - 1]?.[cI + 1], data[rI][cI - 1],
+          data[rI][cI + 1], data[rI + 1]?.[cI - 1], data[rI + 1]?.[cI], data[rI + 1]?.[cI + 1]]
+            .filter(e => [CODE.mine, CODE.mineFlag, CODE.mineQuestion].includes(e)).length;
+          $tbody.children[rI].children[cI].textContent = mineMount ? mineMount : '';
+          return;
+        }
+        $tbody.innerHTML = '';
+        data = [];
+        $form.addEventListener('submit', plantMine);
+        setTimeout(() => { alert('게임끝') }, 100);
+      }
+    }
+
+    let count1=0;
+    let checkBlank = false;
+    function transferMine(rI, cI, mineCheck) {
+      if (mineCheck[rI]?.[cI] === true || mineCheck[rI]?.[cI] === undefined || checkBlank) return;
+      console.log(++count1);
+      if (data[rI - 1]?.[cI - 1] === CODE.blank) {
+        data[rI - 1][cI - 1] = CODE.mine;
+        $tbody.children[rI - 1].children[cI - 1].textContent = 'X';
+      } else if (data[rI - 1]?.[cI] === CODE.blank) {
+        data[rI - 1][cI] = CODE.mine;
+        $tbody.children[rI - 1].children[cI].textContent = 'X';
+      } else if (data[rI - 1]?.[cI + 1] === CODE.blank) {
+        data[rI - 1][cI + 1] = CODE.mine;
+        $tbody.children[rI - 1].children[cI + 1].textContent = 'X';
+      } else if (data[rI]?.[cI - 1] === CODE.blank) {
+        data[rI][cI - 1] = CODE.mine;
+        $tbody.children[rI].children[cI - 1].textContent = 'X';
+      } else if (data[rI]?.[cI + 1] === CODE.blank) {
+        data[rI][cI + 1] = CODE.mine;
+        $tbody.children[rI].children[cI + 1].textContent = 'X';
+      } else if (data[rI + 1]?.[cI - 1] === CODE.blank) {
+        data[rI + 1][cI - 1] = CODE.mine;
+        $tbody.children[rI + 1].children[cI - 1].textContent = 'X';
+      } else if (data[rI + 1]?.[cI] === CODE.blank) {
+        data[rI + 1][cI] = CODE.mine;
+        $tbody.children[rI + 1].children[cI].textContent = 'X';
+      } else if (data[rI + 1]?.[cI + 1] === CODE.blank) {
+        data[rI + 1][cI + 1] = CODE.mine;
+        $tbody.children[rI + 1].children[cI + 1].textContent = 'X';
+      } else {
+        mineCheck[rI][cI] = true;
+        transferMine(rI - 1, cI - 1, mineCheck);
+        transferMine(rI - 1, cI, mineCheck);
+        transferMine(rI - 1, cI + 1, mineCheck);
+        transferMine(rI, cI - 1, mineCheck);
+        transferMine(rI, cI + 1, mineCheck);
+        transferMine(rI + 1, cI - 1, mineCheck);
+        transferMine(rI + 1, cI, mineCheck);
+        transferMine(rI + 1, cI + 1, mineCheck);
+      }
+      checkBlank = true;
+    }
+    function holdMine(event) {
+      event.preventDefault();
+      const rI = event.target.parentNode.rowIndex;
+      const cI = event.target.cellIndex;
+      if (data[rI][cI] === CODE.blank) {
+        data[rI][cI] = CODE.flag;
+        event.target.className = 'flag';
+        event.target.textContent = '!';
+      } else if (data[rI][cI] === CODE.flag) {
+        data[rI][cI] = CODE.question;
+        event.target.className = 'question';
+        event.target.textContent = '?';
+      } else if (data[rI][cI] === CODE.question) {
+        data[rI][cI] = CODE.blank;
+        event.target.className = '';
+        event.target.textContent = '';
+      } else if (data[rI][cI] === CODE.mine) {
+        data[rI][cI] = CODE.mineFlag;
+        event.target.className = 'flag';
+        event.target.textContent = '!';
+      } else if (data[rI][cI] === CODE.mineFlag) {
+        data[rI][cI] = CODE.mineQuestion;
+        event.target.className = 'question';
+        event.target.textContent = '?';
+      } else if (data[rI][cI] === CODE.mineQuestion) {
+        data[rI][cI] = CODE.blank;
+        event.target.className = '';
+        event.target.textContent = 'X';
+      }
+    }
+
+  </script>
+</body>
+
+</html>

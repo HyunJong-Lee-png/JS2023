@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>짝맞추기</title>
+  <style>
+    .card {
+      display: inline-block;
+      margin-right: 20px;
+      margin-bottom: 20px;
+      width: 80px;
+      height: 110px;
+      perspective: 140px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front {
+      background: navy;
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 1px solid black;
+      backface-visibility: hidden;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrapper"></div>
+  <script>
+    const $wrapper = document.querySelector('#wrapper');
+
+    const shuffle = [];
+    const color = ['red', 'yellow', 'green', 'orange', 'violet', 'pink'];
+    const concatColor = color.concat(color);
+    while (concatColor.length > 0) {
+      shuffle.push(concatColor.splice(Math.floor(Math.random() * concatColor.length), 1)[0]);
+    }
+
+    let startTime;
+    let endTime;
+    for (let i = 0; i < 12; i++) {
+      const $card = document.createElement('div');
+      $card.classList.add('card');
+      const $card_inner = document.createElement('div');
+      $card_inner.classList.add('card-inner');
+      const $card_front = document.createElement('div');
+      const $card_back = document.createElement('div');
+      $card_front.classList.add('card-front');
+      $card_back.classList.add('card-back');
+      $card_back.style.backgroundColor = shuffle[i];
+      $card_inner.append($card_front, $card_back);
+      $card.append($card_inner);
+      $wrapper.append($card);
+      setTimeout(() => {
+        $card.classList.add('flipped');
+      }, 100 * i);
+      setTimeout(() => {
+        $card.classList.remove('flipped'); startTime = new Date();
+        $card.addEventListener('click', onClick);
+      }, 3000);
+
+    }
+
+    let clickable = true;
+    const match = [];
+    const succeed = [];
+    function onClick(event) {
+      if (clickable) {
+        if (succeed.includes(this) || match.includes(this)) return;
+        this.classList.add('flipped');
+        match.push(this);
+        if (match.length === 2) {
+          const cardBack1 = match[0].querySelector('.card-back');
+          const cardBack2 = match[1].querySelector('.card-back');
+          if (cardBack1.style.backgroundColor !== cardBack2.style.backgroundColor) {
+            clickable = false;
+            setTimeout(() => {
+              match[0].classList.remove('flipped');
+              match[1].classList.remove('flipped');
+              match.pop();
+              match.pop();
+              clickable = true;
+            }, 700);
+            return;
+          }
+          succeed.push(match[0],match[1]);
+          match.pop();
+          match.pop();
+          console.log(succeed);
+        }
+        if (succeed.length === 12) {
+          endTime = new Date();
+          setTimeout(() => { alert(`클리어 시간: ${endTime - startTime}초 걸렸습니다.`) }, 500);
+          return;
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

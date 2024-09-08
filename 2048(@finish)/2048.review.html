@@ -1,0 +1,326 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>2048</title>
+  <style>
+    #table {
+      border-collapse: collapse;
+      user-select: none;
+    }
+
+    #table td {
+      border: 10px solid #bbada0;
+      width: 116px;
+      height: 128px;
+      font-size: 50px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #score {
+      user-select: none;
+    }
+
+    .color-2 {
+      background-color: #eee4da;
+      color: #776e65;
+    }
+
+    .color-4 {
+      background-color: #eee1c9;
+      color: #776e65;
+    }
+
+    .color-8 {
+      background-color: #f3b27a;
+      color: 'white';
+    }
+
+    .color-16 {
+      background-color: #f69664;
+      color: 'white';
+    }
+
+    .color-32 {
+      background-color: #f77c5f;
+      color: 'white';
+    }
+
+    .color-64 {
+      background-color: #f75f3b;
+      color: 'white';
+    }
+
+    .color-128 {
+      background-color: #edd073;
+      color: #776e65;
+    }
+
+    .color-256 {
+      background-color: #edcc62;
+      color: #776e65;
+    }
+
+    .color-512 {
+      background-color: #edc950;
+      color: #776e65;
+    }
+
+    .color-1024 {
+      background-color: #edc53f;
+      color: #776e65;
+    }
+
+    .color-2048 {
+      background-color: #edc22e;
+      color: #776e65;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="table"></table>
+  <script>
+    const $table = document.querySelector('#table');
+
+    const data = [];
+    const fragment = document.createDocumentFragment();
+    [1, 2, 3, 4].forEach((e, i) => {
+      const tr = document.createElement('tr');
+      const rowData = [];
+      [1, 2, 3, 4].forEach((e, j) => {
+        const td = document.createElement('td');
+        tr.append(td);
+        rowData.push(0);
+      })
+      fragment.append(tr);
+      data.push(rowData);
+    })
+    $table.append(fragment);
+
+    putOn2Number();
+
+    function putOn2Number() {
+      const randomTd = [];
+      data.forEach((rowData, rI) => {
+        rowData.forEach((cellData, cI) => {
+          const td = $table.children[rI].children[cI];
+          if (!td.textContent) {
+            randomTd.push(td);
+          }
+        })
+      })
+      const pickTd = randomTd[Math.floor(Math.random() * randomTd.length)];
+      const pickNumber = [2, 4][Math.floor(Math.random() * 2)];
+      pickTd.textContent = pickNumber;
+      pickTd.className = `color-${pickTd.textContent}`;
+      const rowIndex = pickTd.parentNode.rowIndex;
+      const cellIndex = pickTd.cellIndex;
+      data[rowIndex][cellIndex] = pickNumber;
+    }
+
+    let count = false;
+    function start2048(event) {
+      switch (event.key) {
+        case 'ArrowRight':
+          const newData = [[], [], [], []];
+          for (let i = 0; i < 4; i++) {
+            for (let j = 3; j >= 0; j--) {
+              if (data[i][j]) {
+                const preData = newData[i][newData[i].length - 1];
+                if (preData === data[i][j]) {
+                  newData[i][newData[i].length - 1] *= -2;
+                } else newData[i].push(data[i][j]);
+              }
+            }
+          }
+          const cloneData = JSON.parse(JSON.stringify(data));
+
+          [1, 2, 3, 4].forEach((e, i) => {
+            [1, 2, 3, 4].forEach((e, j) => {
+              data[i][3 - j] = Math.abs(newData[i][j]) || 0;
+            })
+          });
+
+          let count = true;
+          for(let i = 0 ; i<16; i++){
+            if (cloneData.flat()[i] === data.flat()[i]) {
+              count = false;
+            } else {
+              count = true;
+              break;
+          }
+        }
+          if (!count) {
+            if (data.flat().every(e => e)) {
+              setTimeout(() => { alert('패배') }, 50);
+              document.removeEventListener('keydown', start2048);
+            }
+            return;
+          }        
+          draw();
+          putOn2Number();
+          break;
+
+        case 'ArrowLeft': {
+
+          const newData = [[], [], [], []];
+          data.forEach((rowData, i) => {
+            rowData.forEach((cellData, j) => {
+              if (cellData) { // newData = [2, 2, 4]
+                const currentRow = newData[i]
+                const prevData = currentRow[currentRow.length - 1];
+                if (prevData === cellData) { // 이전 값과 지금 값이 같으면
+                  currentRow[currentRow.length - 1] *= -2;
+                } else {
+                  newData[i].push(cellData);
+                }
+              }
+            });
+          });
+          const cloneData = JSON.parse(JSON.stringify(data));
+
+          [1, 2, 3, 4].forEach((e, i) => {
+            [1, 2, 3, 4].forEach((e, j) => {
+              data[i][j] = Math.abs(newData[i][j]) || 0;
+            })
+          });
+
+          let count = true;
+          for(let i = 0 ; i<16; i++){
+            if (cloneData.flat()[i] === data.flat()[i]) {
+              count = false;
+            } else {
+              count = true;
+              break;
+          }
+        }
+          if (!count) {
+            if (data.flat().every(e => e)) {
+              setTimeout(() => { alert('패배') }, 50);
+              document.removeEventListener('keydown', start2048);
+            }
+            return;
+          }        
+          draw();
+          putOn2Number();
+          break;
+        }
+        case 'ArrowUp': {
+          const newData = [[], [], [], []];
+          data.forEach((rowData, i) => {
+            rowData.forEach((cellData, j) => {
+              if (cellData) {
+                const currentRow = newData[j]
+                const prevData = currentRow[currentRow.length - 1];
+                if (prevData === cellData) {
+                  currentRow[currentRow.length - 1] *= -2;
+                } else {
+                  newData[j].push(cellData);
+                }
+              }
+            });
+          });
+          const cloneData = JSON.parse(JSON.stringify(data));
+
+          [1, 2, 3, 4].forEach((e, i) => {
+            [1, 2, 3, 4].forEach((e, j) => {
+              data[j][i] = Math.abs(newData[i][j]) || 0;
+            })
+          });
+
+          let count = true;
+          for(let i = 0 ; i<16; i++){
+            if (cloneData.flat()[i] === data.flat()[i]) {
+              count = false;
+            } else {
+              count = true;
+              break;
+          }
+        }
+          if (!count) {
+            if (data.flat().every(e => e)) {
+              setTimeout(() => { alert('패배') }, 50);
+              document.removeEventListener('keydown', start2048);
+            }
+            return;
+          }        
+          draw();
+          putOn2Number();
+          break;
+        }
+        case 'ArrowDown': {
+          const newData = [[], [], [], []];
+          data.forEach((rowData, i) => {
+            rowData.forEach((cellData, j) => {
+              if (data[3 - i][j]) {
+                const currentRow = newData[j];
+                const prevData = currentRow[currentRow.length - 1];
+                if (prevData === data[3 - i][j]) {
+                  currentRow[currentRow.length - 1] *= -2;
+                } else {
+                  newData[j].push(data[3 - i][j]);
+                }
+              }
+            });
+          });
+          const cloneData = JSON.parse(JSON.stringify(data));
+
+          [1, 2, 3, 4].forEach((e, i) => {
+            [1, 2, 3, 4].forEach((e, j) => {
+              data[3-j][i] = Math.abs(newData[i][j]) || 0;
+            })
+          });
+
+          let count = true;
+          for(let i = 0 ; i<16; i++){
+            if (cloneData.flat()[i] === data.flat()[i]) {
+              count = false;
+            } else {
+              count = true;
+              break;
+          }
+        }
+          if (!count) {
+            if (data.flat().every(e => e)) {
+              setTimeout(() => { alert('패배') }, 50);
+              document.removeEventListener('keydown', start2048);
+            }
+            return;
+          }        
+          draw();
+          putOn2Number();
+          break;
+        }
+      }
+    }
+
+    function winCheck(data) {
+      if (data === 2048) {
+        setTimeout(() => { alert('승리!') }, 50);
+        document.removeEventListener('keydown', start2048);
+        return true;
+      }
+    }
+
+    function draw() {
+      data.forEach((rowData, rI) => {
+        rowData.forEach((cellData, cI) => {
+          const td = $table.children[rI].children[cI];
+          if (cellData) {
+            td.textContent = cellData;
+            td.className = `color-${cellData}`;
+          } else if (!cellData) {
+            td.textContent = '';
+            td.className = '';
+          }
+        })
+      })
+    }
+
+    document.addEventListener('keydown', start2048);
+  </script>
+</body>
+
+</html>

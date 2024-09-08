@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>틱택토</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid black;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!--table>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table-->
+  <script>
+    const { body } = document;
+    const $table = document.createElement('table');
+    const $fragment = document.createDocumentFragment();
+    const $result = document.createElement('div');
+
+    const data = [];
+    [1, 2, 3].forEach((e, i) => {
+      const $tr = document.createElement('tr');
+      const data2 = [];
+      [1, 2, 3].forEach((e, i) => {
+        const $td = document.createElement('td');
+        const data3 = '';
+        $tr.append($td);
+        data2.push(data3);
+      })
+      $fragment.append($tr);
+      data.push(data2);
+    })
+    $table.append($fragment);
+    body.append($table);
+    body.append($result);
+
+    let clickable = true;
+    function my_Turn(event) {
+      let stone = 'O';
+      if (clickable) {
+        if (!event.target.textContent) {
+          clickable = false;
+          const row = event.target.parentNode.rowIndex;
+          const cell = event.target.cellIndex;
+          data[row][cell] = stone;
+          event.target.textContent = stone;
+          if (winCheck(row, cell, stone)) return;
+          if (drawCheck()) return;
+          stone = 'X';
+          com_Turn(stone);
+        }
+      }
+    }
+
+    function com_Turn(stone) {
+      setTimeout(() => {
+        const empty = [];
+        [1, 2, 3].forEach((row, rI) => {
+          [1, 2, 3].forEach((cell, cI) => {
+            const td = $table.children[rI].children[cI];
+            if (!td.textContent) { //빈 칸들
+              empty.push(td);
+            }
+          });
+        });
+        if (!empty.length) return; //칸이 꽉차면 리턴
+        const randomPick = empty[Math.floor(Math.random() * empty.length)];
+        randomPick.textContent = stone;
+        const row = randomPick.parentNode.rowIndex;
+        const cell = randomPick.cellIndex;
+        //$table.querySelectorAll('tr').forEach((tr,trI) => {
+        //  tr.querySelectorAll('td').forEach((td,tdI) =>{
+        //    if(randomPick === td){
+        //      data[trI][tdI] = stone;
+        //    }
+        //  })
+        //})
+        data[row][cell] = stone;
+        if (winCheck(row, cell, stone)) return;
+        clickable = true;
+      }, 1000);
+    }
+
+    function winCheck(row, cell, stone) {
+      if ((data[row][0] === stone && data[row][1] === stone && data[row][2] === stone) ||
+        (data[0][cell] === stone && data[1][cell] === stone && data[2][cell] === stone) ||
+        (data[0][0] === stone && data[1][1] === stone && data[2][2] === stone) ||
+        (data[0][2] === stone && data[1][1] === stone && data[2][0] === stone)) {
+        $result.textContent = `${stone} 승!`;
+        return true;
+      }
+      return false;
+    }
+
+    function drawCheck() {
+      if (data.flat().every(e => e)) {
+        $result.textContent = '무승부!'
+        return true;
+      }
+    }
+    $table.addEventListener('click', my_Turn);
+
+  </script>
+</body>
+
+</html>

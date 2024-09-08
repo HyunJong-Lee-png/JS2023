@@ -1,0 +1,104 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>가위바위보</title>
+  <style>
+    #computer {
+      width: 142px;
+      height: 200px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="computer"></div>
+  <div>
+    <button id="scissors" class="btn">가위</button>
+    <button id="rock" class="btn">바위</button>
+    <button id="paper" class="btn">보</button>
+  </div>
+  <div id="score">0</div>
+  <script>
+    const $computer = document.querySelector('#computer');
+    const $scissors = document.querySelector('#scissors');
+    const $rock = document.querySelector('#rock');
+    const $paper = document.querySelector('#paper');
+    const $score = document.querySelector('#score');
+
+    $computer.style.backgroundImage = "url(./rsp.png)";
+    $computer.style.backgroundSize = 'auto 200px';
+
+    const rsp = {
+      scissors: 0,
+      paper: 165,
+      rock: 375,
+    }
+
+    let scissors = true;
+    let paper = false;
+    let rock = false;
+
+    let tId = setInterval(rotate, 1000);
+
+    function rotate() {
+      if (scissors) {
+        $computer.style.backgroundPosition = `${rsp.scissors}px 0px`;
+        scissors = false;
+        paper = true;
+      } else if (paper) {
+        $computer.style.backgroundPosition = `${rsp.paper}px 0px`;
+        paper = false;
+        rock = true;
+      } else if (rock) {
+        $computer.style.backgroundPosition = `${rsp.rock}px 0px`;
+        rock = false;
+        scissors = true;
+      }
+    };
+
+    let score = 0;
+    $scissors.addEventListener('click', rspBattle);
+    $rock.addEventListener('click', rspBattle);
+    $paper.addEventListener('click', rspBattle);
+
+    let clickable = true;
+    function rspBattle(event) {
+
+      if (clickable) {
+        clickable = false;
+        clearInterval(tId);
+        switch (event.target.id) {
+          case "rock":
+            if (paper) {//컴퓨터가 가위면
+              score++;
+            } else if (rock) {
+              score--;
+            }
+            break;
+
+          case "scissors":
+            if (rock) {//컴퓨터가 가위면
+              score++;
+            } else if (scissors) {
+              score--;
+            }
+            break;
+
+          case "paper":
+            if (scissors) {//컴퓨터가 가위면
+              score++;
+            } else if (paper) {
+              score--;
+            }
+            break;
+        }
+        $score.textContent = `${score}점`;
+        setTimeout(() => { tId = setInterval(rotate, 50), clickable = true; }, 1000);
+      }
+
+    }
+  </script>
+</body>
+
+</html>

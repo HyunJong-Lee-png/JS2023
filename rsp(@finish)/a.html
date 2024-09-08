@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #rsp {
+      width: 142px;
+      height: 200px;
+      background-image: url('rsp.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .rock {
+      background-position: -232px;
+    }
+
+    .sigger {
+      background-position: 0px;
+    }
+
+    .paper {
+      background-position: -442px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="rsp" class="rock"></div>
+  <button class="sigger">가위</button>
+  <button class="rock">바위</button>
+  <button class="paper">보</button>
+  <div class="result"></div>
+  <script>
+    const $sigger = document.querySelector('.sigger');
+    const $rock = document.querySelector('button.rock');
+    const $paper = document.querySelector('.paper');
+    const $result = document.querySelector('.result');
+    const $rsp = document.querySelector('#rsp');
+
+    let tId;
+    let score = 0;
+    let control = false;
+
+    tId = setInterval(handleRSP, 50);
+
+    function handleRSP() {
+      if ($rsp.classList.contains('rock')) {
+        $rsp.classList.remove('rock');
+        $rsp.classList.add('sigger');
+      } else if ($rsp.classList.contains('sigger')) {
+        $rsp.classList.remove('sigger');
+        $rsp.classList.add('paper');
+      } else {
+        $rsp.classList.remove('paper');
+        $rsp.classList.add('rock');
+      }
+    };
+
+    $rock.addEventListener('click', handleClick);
+    $sigger.addEventListener('click', handleClick);
+    $paper.addEventListener('click', handleClick);
+
+    function handleClick(e) {
+      if (control) return;
+      const myChoice = e.target.className;
+      const comChoice = $rsp.className;
+      clearInterval(tId);
+      control = true;
+      if (myChoice === comChoice) {
+        $result.textContent = `비김`;
+      } else if ((myChoice === 'rock' && comChoice === 'sigger') ||
+        (myChoice === 'sigger' && comChoice === 'paper') ||
+        (myChoice === 'paper' && comChoice === 'rock')
+      ) {
+        $result.textContent = `이김! ${++score}점`;
+      } else {
+        $result.textContent = `패배... ${--score}점`;
+      }
+      setTimeout(() => { tId = setInterval(handleRSP, 50); control = false; }, 1000);
+    }
+  </script>
+</body>
+
+</html>

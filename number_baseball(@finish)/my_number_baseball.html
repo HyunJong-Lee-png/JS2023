@@ -1,0 +1,132 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>숫자야구</title>
+</head>
+
+<body>
+    <form id="form">
+        <input readonly type="text" id="input">
+        <button type="button" id="answer">정답저장</button>
+        <button type="button" id="try">1번째 시도</button>
+        <button type="button" id="reset">리셋</button>
+    </form>
+    <div id="logs"></div>
+    <script>
+        const $input = document.querySelector('#input');
+        const $answer = document.querySelector('#answer');
+        const $try = document.querySelector('#try');
+        const $reset = document.querySelector('#reset');
+        let answer = '';
+        let tryAnswer;
+        let tryCount = 0;
+
+
+        const randomNumber = () => {
+
+            for (let i = 0; i < 4; i++) {
+
+                let temp = Math.floor(Math.random() * 9) + 1; //1~9중 숫자 생성
+                answer += temp; //총 4개의 문자열 숫자 생성
+            }
+        }
+
+        const baseballAnswer = () => {
+
+            randomNumber();
+            let count = 0;
+
+            for (let i = 0; i < answer.length; i++) {
+
+                if (answer.indexOf(answer[i]) !== answer.lastIndexOf(answer[i])) { //중복되는 숫자가 있으면 ex)1146
+                    answer = ''; //여기다 넣으면 중복되는 숫자가 발견된 순간 for문을 빠져나온다.
+                    count++;
+                }
+            }
+
+            if (count === 0) {
+                alert(`정답이 저장됐습니다.`);
+                // answer = ''; 여기다 넣으면 위의 for문은 무조건 4번 돈다.
+
+            } else baseballAnswer();
+
+        }
+
+        const userAnswer = () => {
+
+            if (answer) {
+                tryAnswer = prompt('먼저 4개의 각기 다른 숫자를 입력해주세요.');
+                let strike = 0;
+                let ball = 0;
+                let out = 0;
+
+                if (!(tryAnswer.length === 4)) {
+                    alert('4개의 숫자를 입력하세요.');
+                    return;
+                } else if (!Number(tryAnswer)) {//문자가 입력됐으면
+                    alert('숫자로만 입력해 주십시오');
+                    return;
+                }
+
+                for (let i = 0; i < tryAnswer.length; i++) {
+
+                    if (tryAnswer.indexOf(tryAnswer[i]) !== tryAnswer.lastIndexOf(tryAnswer[i])) { //중복되는 숫자가 있으면
+                        alert('모두 다른 숫자여야 합니다.');
+                        return;
+                    }
+                }
+
+                for (let i = 0; i < tryAnswer.length; i++) {
+                    if (answer[i] === tryAnswer[i]) {
+                        strike++;
+                    } else if (tryAnswer.indexOf(answer[i]) > -1) {
+                        ball++;
+                    } else {
+                        out++;
+                    }
+                }
+
+                if (strike === 4) {
+                    alert('정답입니다!!');
+                    answer = '';
+                    $try.textContent = "1번째 시도";
+                    $input.value = '';
+                    tryCount = 0;
+                } else {
+                    $input.value = `${strike}-strike, ${ball}-ball, ${out}-out`;
+                    $try.textContent = `${tryAnswer}, ${tryCount + 2} 번째 시도, (${10 - tryCount}번 남았습니다.)`;
+                    tryCount++;
+                }
+
+            } else { alert('정답부터 저장해주세요.'); }
+
+            if (tryCount === 10) {
+                alert(`당신은 졌습니다.ㅋㅋ 정답은 ${answer} 였습니다.`);
+                answer = '';
+                $try.textContent = "1번째 시도";
+                $input.value = '';
+                tryCount = 0;
+                challengeCount = 0
+            }
+
+        }
+
+        const reset = () => {
+            answer = '';
+            $try.textContent = "1번째 시도";
+            $input.value = '';
+            tryCount = 0;
+            strike = 0;
+            ball = 0;
+            out = 0;
+            challengeCount = 0
+        }
+
+        $answer.addEventListener('click', baseballAnswer);
+        $try.addEventListener('click', userAnswer);
+        $reset.addEventListener('click', reset);
+    </script>
+</body>
+
+</html>

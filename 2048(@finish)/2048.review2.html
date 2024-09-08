@@ -1,0 +1,330 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>2048</title>
+  <style>
+    #table {
+      border-collapse: collapse;
+      user-select: none;
+    }
+
+    #table td {
+      border: 10px solid #bbada0;
+      width: 116px;
+      height: 128px;
+      font-size: 50px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #score {
+      user-select: none;
+    }
+
+    .color-2 {
+      background-color: #eee4da;
+      color: #776e65;
+    }
+
+    .color-4 {
+      background-color: #eee1c9;
+      color: #776e65;
+    }
+
+    .color-8 {
+      background-color: #f3b27a;
+      color: 'white';
+    }
+
+    .color-16 {
+      background-color: #f69664;
+      color: 'white';
+    }
+
+    .color-32 {
+      background-color: #f77c5f;
+      color: 'white';
+    }
+
+    .color-64 {
+      background-color: #f75f3b;
+      color: 'white';
+    }
+
+    .color-128 {
+      background-color: #edd073;
+      color: #776e65;
+    }
+
+    .color-256 {
+      background-color: #edcc62;
+      color: #776e65;
+    }
+
+    .color-512 {
+      background-color: #edc950;
+      color: #776e65;
+    }
+
+    .color-1024 {
+      background-color: #edc53f;
+      color: #776e65;
+    }
+
+    .color-2048 {
+      background-color: #edc22e;
+      color: #776e65;
+    }
+  </style>
+</head>
+
+<body>
+  <table id="table"></table>
+  <script>
+    const $table = document.querySelector('#table');
+    const data = [];
+    [1, 2, 3, 4].forEach(e => {
+      const $tr = document.createElement('tr');
+      const rowData = [];
+      [1, 2, 3, 4].forEach(e => {
+        const $td = document.createElement('td');
+        const cellData = '';
+        $tr.append($td);
+        rowData.push(cellData);
+      })
+      $table.append($tr);
+      data.push(rowData);
+    })
+
+    randomCell();
+
+    function randomCell() {
+      const shuffle = [];
+      data.forEach((rowData, rowIndex) => {
+        rowData.forEach((cellData, cellIndex) => {
+          if (!cellData) {
+            shuffle.push([rowIndex, cellIndex]);
+          }
+        })
+      })
+      const randomIndex = Math.floor(Math.random() * shuffle.length);
+      const emptyRow = shuffle[randomIndex][0];
+      const emptyColumn = shuffle[randomIndex][1];
+      data[emptyRow][emptyColumn] = 2;
+      $table.children[emptyRow].children[emptyColumn].textContent = data[emptyRow][emptyColumn];
+      textAndColor();
+    }
+
+    let count;
+    function 함수(event) {
+      count = false;
+      let zeroBasket = [];
+      let otherBasket = [];
+      switch (event.key) {
+        case 'ArrowRight':
+          conerNumber1();
+          data.forEach((rowData, rowIndex) => { 
+            rowData.forEach((cellData, cellIndex) => {
+              if (!data[rowIndex][3 - cellIndex]) {
+                zeroBasket.push(0);//0인것만 담아두는 배열에 담기
+                return;
+              }
+              if (data[rowIndex][3 - cellIndex] === data[rowIndex][2 - cellIndex]) { 
+                data[rowIndex][3 - cellIndex] *= 2;
+                data[rowIndex][2 - cellIndex] = 0;
+                count = true;
+              }
+              otherBasket.push(data[rowIndex][3 - cellIndex]);//0제외인것만 담아두는 배열에 담기
+            })
+            let i = 0;
+            while (zeroBasket.length > 0) { //0인것만 담아두는 배열 먼저 하나씩 매칭하고 0제외 배열 매칭
+              data[rowIndex][i] = zeroBasket.splice(zeroBasket.length - 1, 1)[0];
+              i++;
+            }
+
+            let j = i;
+            while (otherBasket.length > 0) {
+              data[rowIndex][j] = otherBasket.splice(otherBasket.length - 1, 1)[0];
+              j++;
+            }
+          })
+          break;
+        case 'ArrowLeft':
+          conerNumber2();
+          data.forEach((rowData, rowIndex) => {
+            rowData.forEach((cellData, cellIndex) => {
+              if (!data[rowIndex][cellIndex]) {
+                zeroBasket.push(0);
+                return;
+              }
+              if (data[rowIndex][cellIndex] === data[rowIndex][cellIndex + 1]) {
+                data[rowIndex][cellIndex] *= 2;
+                data[rowIndex][cellIndex + 1] = 0;
+                count = true;
+              }
+              otherBasket.push(data[rowIndex][cellIndex]);
+            })
+            let i = 0;
+            while (otherBasket.length > 0) {
+              data[rowIndex][i] = otherBasket.splice(0, 1)[0];
+              i++;
+            }
+            let j = i;
+            while (zeroBasket.length > 0) {
+              data[rowIndex][j] = zeroBasket.splice(zeroBasket.length - 1, 1)[0];
+              j++;
+            }
+          })
+          break;
+        case 'ArrowUp':
+          conerNumber3();
+          data.forEach((rowData, rowIndex) => {
+            rowData.forEach((cellData, cellIndex) => {
+              if (!data[cellIndex][rowIndex]) {
+                zeroBasket.push(0);
+                return;
+              }
+              if (data[cellIndex][rowIndex] === data[cellIndex + 1]?.[rowIndex]) {
+                data[cellIndex][rowIndex] *= 2;
+                data[cellIndex + 1][rowIndex] = 0;
+                count = true;
+              }
+              otherBasket.push(data[cellIndex][rowIndex]);
+            })
+            let i = 0;
+            while (otherBasket.length > 0) {
+              data[i][rowIndex] = otherBasket.splice(0, 1)[0];
+              i++;
+            }
+            let j = i;
+            while (zeroBasket.length > 0) {
+              data[j][rowIndex] = zeroBasket.splice(zeroBasket.length - 1, 1)[0];
+              j++;
+            }
+          })
+          break;
+        case 'ArrowDown':
+          conerNumber4();
+          data.forEach((rowData, rowIndex) => {
+            rowData.forEach((cellData, cellIndex) => {
+              if (!data[3 - cellIndex][rowIndex]) {
+                zeroBasket.push(0);
+                return;
+              }
+              if (data[3 - cellIndex][rowIndex] === data[2 - cellIndex]?.[rowIndex]) {
+                data[3 - cellIndex][rowIndex] *= 2;
+                data[2 - cellIndex][rowIndex] = 0;
+                count = true;
+              }
+              otherBasket.push(data[3 - cellIndex][rowIndex]);
+            })
+            let i = 0;
+            while (otherBasket.length > 0) {
+              data[3 - i][rowIndex] = otherBasket.splice(0, 1)[0];
+              i++;
+            }
+            let j = i;
+            while (zeroBasket.length > 0) {
+              data[3 - j][rowIndex] = zeroBasket.splice(zeroBasket.length - 1, 1)[0];
+              j++;
+            }
+          })
+          break;
+      }
+      textAndColor();
+      if (data.flat().every(e => e)) {
+        setTimeout(() => { alert('패배!'); }, 100);
+        document.removeEventListener('keydown', 함수);
+        return;
+      } else if (data.flat().includes(2048)) {
+        setTimeout(() => { alert('승리!'); }, 100);
+        document.removeEventListener('keydown', 함수);
+        return;
+      } else if (!count) return;
+      randomCell();
+    }
+
+    function conerNumber1() {
+      let i = 3;
+      while (i > 0) {
+        data.forEach((rowData, rowIndex) => {
+          rowData.forEach((cellData, cellIndex) => {
+            if (!data[rowIndex][3 - cellIndex] && data[rowIndex][2 - cellIndex]) {
+              data[rowIndex][3 - cellIndex] = data[rowIndex][2 - cellIndex];
+              data[rowIndex][2 - cellIndex] = 0;
+              count = true;
+            }
+          })
+        })
+        i--;
+      }
+    }
+
+    function conerNumber2() {
+      let i = 3;
+      while (i > 0) {
+        data.forEach((rowData, rowIndex) => {
+          rowData.forEach((cellData, cellIndex) => {
+            if (!data[rowIndex][cellIndex] && data[rowIndex][cellIndex + 1]) {
+              data[rowIndex][cellIndex] = data[rowIndex][cellIndex + 1];
+              data[rowIndex][cellIndex + 1] = 0;
+              count = true;
+            }
+          })
+        })
+        i--;
+      }
+    }
+
+    function conerNumber3() {
+      let i = 3;
+      while (i > 0) {
+        data.forEach((rowData, rowIndex) => {
+          rowData.forEach((cellData, cellIndex) => {
+            if (!data[cellIndex][rowIndex] && data[cellIndex + 1]?.[rowIndex]) {
+              data[cellIndex][rowIndex] = data[cellIndex + 1]?.[rowIndex];
+              data[cellIndex + 1][rowIndex] = 0;
+              count = true;
+            }
+          })
+        })
+        i--;
+      }
+    }
+
+    function conerNumber4() {
+      let i = 3;
+      while (i > 0) {
+        data.forEach((rowData, rowIndex) => {
+          rowData.forEach((cellData, cellIndex) => {
+            if (!data[3 - cellIndex][rowIndex] && data[2 - cellIndex]?.[rowIndex]) {
+              data[3 - cellIndex][rowIndex] = data[2 - cellIndex]?.[rowIndex];
+              data[2 - cellIndex][rowIndex] = 0;
+              count = true;
+            }
+          })
+        })
+        i--;
+      }
+    }
+
+    function textAndColor() {
+      data.forEach((rowData, rowIndex) => {
+        rowData.forEach((cellData, cellIndex) => {
+          if (cellData) {
+            $table.children[rowIndex].children[cellIndex].textContent = cellData;
+            $table.children[rowIndex].children[cellIndex].className = `color-${cellData}`;
+          } else if (!cellData) {
+            $table.children[rowIndex].children[cellIndex].textContent = '';
+            $table.children[rowIndex].children[cellIndex].className = '';
+          }
+        })
+      })
+    }
+
+    document.addEventListener('keydown', 함수);
+  </script>
+</body>
+
+</html>

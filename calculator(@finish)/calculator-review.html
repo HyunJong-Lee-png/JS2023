@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>계산기</title>
+  <style>
+    * {
+      box-sizing: border-box
+    }
+
+    #result {
+      width: 180px;
+      height: 50px;
+      margin: 5px;
+      text-align: right
+    }
+
+    #operator {
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      text-align: center
+    }
+
+    button {
+      width: 50px;
+      height: 50px;
+      margin: 5px
+    }
+  </style>
+</head>
+
+<!-- 계산기 버튼 구현 -->
+
+<body>
+  <input readonly id="operator">
+  <input readonly type="text" id="result">
+  <div class="row">
+    <button id="num-7">7</button>
+    <button id="num-8">8</button>
+    <button id="num-9">9</button>
+    <button id="plus">+</button>
+  </div>
+  <div class="row">
+    <button id="num-4">4</button>
+    <button id="num-5">5</button>
+    <button id="num-6">6</button>
+    <button id="minus">-</button>
+  </div>
+  <div class="row">
+    <button id="num-1">1</button>
+    <button id="num-2">2</button>
+    <button id="num-3">3</button>
+    <button id="divide">/</button>
+  </div>
+  <div class="row">
+    <button id="clear">C</button>
+    <button id="num-0">0</button>
+    <button id="calculate">=</button>
+    <button id="multiply">x</button>
+  </div>
+  <script>
+    const $operator = document.querySelector('#operator');
+    const $result = document.querySelector('#result');
+    const $num0 = document.querySelector('#num-0');
+    const $num1 = document.querySelector('#num-1');
+    const $num2 = document.querySelector('#num-2');
+    const $num3 = document.querySelector('#num-3');
+    const $num4 = document.querySelector('#num-4');
+    const $num5 = document.querySelector('#num-5');
+    const $num6 = document.querySelector('#num-6');
+    const $num7 = document.querySelector('#num-7');
+    const $num8 = document.querySelector('#num-8');
+    const $num9 = document.querySelector('#num-9');
+    const $plus = document.querySelector('#plus');
+    const $minus = document.querySelector('#minus');
+    const $divide = document.querySelector('#divide');
+    const $multiply = document.querySelector('#multiply');
+    const $clear = document.querySelector('#clear');
+    const $calculate = document.querySelector('#calculate');
+
+    let numOne = '';
+    let numTwo = '';
+    let operator = '';
+    let result;
+
+    [1, 2, 3, 4].forEach((e, i) => {
+      document.querySelectorAll('.row')[i].addEventListener('click', onClickButton);
+    });
+
+    function onClickButton(event) {
+      if ([$plus, $minus, $divide, $multiply].includes(event.target)) { //operator연산자를 클릭했으면
+        if (!numOne){
+          if (event.target === $minus){
+            numOne += event.target.textContent;
+            $result.value = numOne;
+          } 
+          return;  
+        }
+        if (numOne && numTwo) {
+          calculate(operator);
+          numOne = result;
+          $result.value = result;
+          numTwo = '';
+        }  
+        if(numOne === '-') return; //-만 있으면 operator엔 안들어가게
+        operator = event.target.textContent;
+        $operator.value = operator;     
+      } else if ([$num0, $num1, $num2, $num3, $num4, $num5, $num6, $num7, $num8, $num9].includes(event.target)) {
+        const num = event.target.textContent;
+
+        if (operator) {
+          $result.value = '';
+          numTwo += num;
+          $result.value += numTwo;
+        } else {
+          numOne += num;
+          $result.value += num;
+        }
+      } else if (event.target === $clear) {
+        $operator.value = '';
+        $result.value = '';
+        numOne = '';
+        numTwo = '';
+        operator = '';
+      } else if (event.target === $calculate) {
+        if (!numOne || !numTwo) return;
+        calculate(operator);
+        $result.value = result;
+        $operator.value = '';
+        numOne = result;
+        numTwo = '';
+        operator = '';
+      }
+    }
+
+    function calculate(operator) {
+      switch (operator) {
+        case '+':
+          result = parseInt(numOne) + parseInt(numTwo);
+          break;
+        case '-':
+          result = parseInt(numOne) - parseInt(numTwo);
+          break;
+        case 'x':
+          result = parseInt(numOne) * parseInt(numTwo);
+          break;
+        case '/':
+          result = (parseInt(numOne) / parseInt(numTwo)).toFixed(3);
+      }
+    }
+  </script>
+</body>

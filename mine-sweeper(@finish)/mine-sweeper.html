@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>지뢰찾기</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid #bbb;
+      text-align: center;
+      line-height: 20px;
+      width: 20px;
+      height: 20px;
+      background: #888;
+    }
+
+    td.opened {
+      background: white;
+    }
+
+    td.flag {
+      background: red;
+    }
+
+    td.question {
+      background: orange;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <input placeholder="지뢰" id="mine" size="5" />
+    <button>생성</button>
+  </form>
+  <div id="timer">0초</div>
+  <table id="table">
+    <tbody></tbody>
+  </table>
+  <div id="result"></div>
+  <script>
+    const $tbody = document.querySelector('#table tbody');
+    const $result = document.querySelector('#result');
+    const row = 10;
+    const cell = 10;
+    const mine = 10;
+    const CODE = {
+      NORMAL: -1,
+      QUESTION: -2,
+      FLAG: -3,
+      QUESTION_MINE: -4,
+      FLAG_MINE: -5,
+      MINE: -6,
+      OPENED: 1 // 0이상이면 모두 열린 칸
+    }
+    let data;
+
+    function plantMine() { //지뢰심기
+      const candidate = Array(row * cell).fill().map((e, i) => { return i });
+      const shuffle = [];
+      while (candidate.length > row * cell - mine) {
+        const chosen = candidate.splice(Math.floor(Math.random() * candidate.length), 1)[0];
+        shuffle.push(chosen);
+      }
+
+      const data = [];
+      for (let i = 0; i < row; i++) {
+        const rowData = [];
+        data.push(rowData);
+        for (let j = 0; j < cell; j++) {
+          rowData.push(CODE.NORMAL);
+        }
+      }
+
+      for (let k = 0; k < shuffle.length; k++) { //지뢰 심기
+        const rowIndex = Math.floor(shuffle[k] / cell);
+        const cellIndex = shuffle[k] % cell;
+        data[rowIndex][cellIndex] = CODE.MINE;
+      }
+      return data;
+    }
+
+    function countMine(rowIndex, cellIndex) {
+      const mines = [CODE.MINE, CODE.FLAG_MINE, CODE.QUESTION_MINE];
+      let i = 0;
+      let check = data[rowIndex - 1] ? data[rowIndex - 1][cellIndex - 1] ? data[rowIndex - 1][cellIndex - 1] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex - 1] ? data[rowIndex - 1][cellIndex] ? data[rowIndex - 1][cellIndex] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex - 1] ? data[rowIndex - 1][cellIndex + 1] ? data[rowIndex - 1][cellIndex + 1] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex] ? data[rowIndex][cellIndex - 1] ? data[rowIndex][cellIndex - 1] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex] ? data[rowIndex][cellIndex + 1] ? data[rowIndex][cellIndex + 1] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex + 1] ? data[rowIndex + 1][cellIndex - 1] ? data[rowIndex + 1][cellIndex - 1] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex + 1] ? data[rowIndex + 1][cellIndex] ? data[rowIndex + 1][cellIndex] : '' : '';
+      if (mines.includes(check)) i++;
+      check = data[rowIndex + 1] ? data[rowIndex + 1][cellIndex + 1] ? data[rowIndex + 1][cellIndex + 1] : '' : '';
+      if (mines.includes(check)) i++;
+      console.log(i)
+      //mines.includes(data[rowIndex - 1]?.[cellIndex - 1]) && i++; 로 해도됨
+      return i;
+
+    }
+    function onRightClick(event) {
+      event.preventDefault();
+
+      const rowIndex = event.target.parentNode.rowIndex;
+      const cellIndex = event.target.cellIndex;
+      const cellData = data[rowIndex][cellIndex];
+      if (cellData === CODE.MINE) { //지뢰면
+        data[rowIndex][cellIndex] = CODE.QUESTION_MINE; //물음표 지뢰로
+        event.target.className = 'question'; //색깔도 같이 바꿔주기
+        event.target.textContent = '?';
+      } else if (cellData === CODE.QUESTION_MINE) { //물음표 지뢰면
+        data[rowIndex][cellIndex] = CODE.FLAG_MINE; //깃발 지뢰로
+        event.target.className = 'flag';
+        event.target.textContent = '!';
+      } else if (cellData === CODE.FLAG_MINE) { //깃발 지뢰면
+        data[rowIndex][cellIndex] = CODE.MINE;
+        event.target.classList.remove('flag');
+        event.target.textContent = 'X';
+      }
+      if (cellData === CODE.OPENED) return;//이미 클릭한 칸이면
+      if (cellData === CODE.NORMAL) { //빈칸이면
+        data[rowIndex][cellIndex] = CODE.QUESTION; //물음표로 바꿔준다
+        event.target.className = 'question';
+        event.target.textContent = '?';
+        return;
+      }
+      if (cellData === CODE.QUESTION) { //이미 물음표 상태면
+        data[rowIndex][cellIndex] = CODE.FLAG; // 깃발로 바꿔준다.
+        event.target.className = 'flag';
+        event.target.textContent = '!';
+        return;
+      }
+      if (cellData === CODE.FLAG) { //이미 깃발 상태면
+        data[rowIndex][cellIndex] = CODE.NORMAL; // 깃발로 바꿔준다.
+        event.target.classList.remove('flag');
+        event.target.textContent = '';
+        return;
+      }
+      return;
+    }
+
+    function onLeftClick(event) {
+      const rowIndex = event.target.parentNode.rowIndex;
+      const cellIndex = event.target.cellIndex;
+      const cellData = data[rowIndex][cellIndex];
+      if (cellData === CODE.MINE) { //지뢰면
+        alert('GAMEOVER');
+        data = '';
+        $tbody.removeEventListener('contextmenu', onRightClick);
+        $tbody.removeEventListener('click', onLeftClick);
+        console.log($tbody.children);
+        Array.from($tbody.children).forEach(e => e.remove());
+        drawTable();
+      }
+      if (cellData === CODE.NORMAL) {//비었으면
+        const count = countMine(rowIndex, cellIndex);
+        event.target.textContent = count || ''; //하나라도 true면 true값 바로 반환
+        data[rowIndex][cellIndex] = CODE.OPENED; //count로 해도 상관x
+        event.target.className = 'opened';
+      }
+      //나머진 무시
+    }
+
+    function drawTable() {
+      data = plantMine();
+      data.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        row.forEach((cell, i) => {
+          const td = document.createElement('td');
+          if (cell === CODE.MINE) {
+            td.textContent = 'X'; //편의를 위해
+          }
+          tr.append(td);
+        })
+        $tbody.append(tr);
+      })
+      $tbody.addEventListener('contextmenu', onRightClick);
+      $tbody.addEventListener('click', onLeftClick);
+    }
+    drawTable();
+  </script>
+</body>
+
+</html>

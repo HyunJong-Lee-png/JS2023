@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>계산기</title>
+  <style>
+    * {
+      box-sizing: border-box
+    }
+
+    #calculator-grid {
+      display: grid;
+      grid-template-rows: repeat(5, 50px);
+      grid-template-columns: repeat(4, 50px);
+      gap: 10px;
+    }
+
+    #result {
+      grid-column: span 3 / 5;
+      text-align: right;
+    }
+
+    #operator {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<!-- 계산기 버튼 구현 -->
+
+<body>
+  <div id="calculator-grid">
+    <input readonly id="operator" />
+    <input readonly id="result" type="text" />
+    <button class="number">7</button>
+    <button class="number">8</button>
+    <button class="number">9</button>
+    <button class="operation">+</button>
+    <button class="number">4</button>
+    <button class="number">5</button>
+    <button class="number">6</button>
+    <button class="operation">-</button>
+    <button class="number">1</button>
+    <button class="number">2</button>
+    <button class="number">3</button>
+    <button class="operation">/</button>
+    <button class="clear">C</button>
+    <button class="number">0</button>
+    <button class="calculate">=</button>
+    <button class="operation">x</button>
+  </div>
+  <script>
+    const $operator = document.querySelector('#operator');
+    const $result = document.querySelector('#result');
+
+    document.querySelector('#calculator-grid').addEventListener('click',onClick);
+
+    let num1 = '';
+    let num2 = '';
+    let operator;
+    function onClick(event) {
+
+      if (event.target.className === 'number') {
+
+        const number = event.target.textContent;
+        if (operator) {
+          num2 += number;
+          $result.value = '';
+          $result.value += num2;
+          return;
+        }
+        num1 += number;
+        $result.value += number;
+      } else if (event.target.className === 'operation') {
+        const oper = event.target.textContent;
+        if (!num1) {
+          if (oper === '-') {
+            num1 += oper;
+            $result.value += oper;
+          }
+          return;
+        }
+        if (num1 === '-') {
+          return;
+        }
+        if (num2) {
+          calculate();
+        }
+        operator = oper;
+        $operator.value = oper;
+      } else if (event.target.className === 'calculate') {
+        calculate();
+        $operator.value = '';
+      } else if (event.target.className === 'clear') {
+        num1 = '';
+        num2 = '';
+        operator = '';
+        $result.value = '';
+        $operator.value = '';
+      }
+
+      function calculate() {
+        switch (operator) {
+          case '+':
+            $result.value = parseInt(num1) + parseInt(num2);
+            break;
+          case '-':
+            $result.value = parseInt(num1) - parseInt(num2);
+            break;
+          case '/':
+            $result.value = (parseInt(num1) / parseInt(num2)).toFixed(3);
+            break;
+          case 'x':
+            $result.value = parseInt(num1) * parseInt(num2);
+            break;
+        }
+        num1 = $result.value;
+        num2 = '';
+      }
+    }
+
+  </script>
+</body>
